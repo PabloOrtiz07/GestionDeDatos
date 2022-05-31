@@ -66,7 +66,24 @@ CREATE TABLE Circuito(
 	CONSTRAINT FK_id_CircuitoPais FOREIGN KEY(circuito_pais) REFERENCES [Pais](pais_codigo)
 )
 
+CREATE TABLE Carrera(
+	carrera_codigo int NOT NULL,
+	carrera_circuito int,
+	carrera_cantidad_vueltas int,
+	carrera_fecha date,
+	carrera_clima nvarchar(100),
+	CONSTRAINT PK_CARRERA PRIMARY KEY(carrera_codigo),
+	CONSTRAINT FK_id_CarreraCircuito FOREIGN KEY(carrera_circuito) REFERENCES [Circuito](circuito_codigo)
+)
 
+CREATE TABLE Auto_Carrera(
+	auto_carrera_codigo int NOT NULL,
+	auto_carrera_auto int,
+	auto_carrera_carrera int,
+	CONSTRAINT PK_AUTO_CARRERA PRIMARY KEY(auto_carrera_codigo),
+	CONSTRAINT FK_id_AUTO FOREIGN KEY(auto_carrera_auto) REFERENCES [Auto](auto_codigo),
+	CONSTRAINT FK_id_CARRERA FOREIGN KEY(auto_carrera_carrera) REFERENCES [Carrera](carrera_codigo)
+)
 
 
 --CREACION DE INDICES
