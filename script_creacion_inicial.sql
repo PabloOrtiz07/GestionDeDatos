@@ -109,27 +109,37 @@ BEGIN
 
 	-- Carga de tabla Auto_Carrera
 	--VER SI ESTÁ BIEN CARGADA ESTA TABLA
-	CREATE PROCEDURE cargar_tabla_auto_carrera	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Auto_Carrera (auto_carrera_auto, auto_carrera_carrera)		SELECT 			a.auto_codigo,			CODIGO_CARRERA		FROM gd_esquema.Maestra m		--JOIN [NOCURSOMASLOSSABADOS].[Auto_Modelo] am ON am.auto_modelo_descripcion = m.AUTO_MODELO		JOIN [NOCURSOMASLOSSABADOS].[Auto] a ON a.auto_numero = m.AUTO_NUMERO		JOIN [NOCURSOMASLOSSABADOS].[Auto_Modelo] am ON am.auto_modelo_descripcion = m.AUTO_MODELO		where a.auto_codigo = 6		group by a.auto_numero, am.auto_modelo_descripcion, a.auto_codigo		--group by am.auto_modelo_codigo, CODIGO_CARRERA			--JOIN [NOCURSOMASLOSSABADOS].[Auto] a ON a.auto_codigo = am.auto_modelo_codigo		--JOIN [NOCURSOMASLOSSABADOS].[Carrera] c ON 		--a.auto_modelo = m.AUTO_MODELO AND a.auto_numero = m.AUTO_NUMERO		--JOIN [NOCURSOMASLOSSABADOS].[Carrera] c ON c.carrera_codigo = m.CODIGO_CARRERA	END
+	CREATE PROCEDURE cargar_tabla_auto_carrera	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Auto_Carrera (auto_carrera_auto, auto_carrera_carrera)		SELECT distinct			a.auto_codigo,			CODIGO_CARRERA		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Auto] a ON a.auto_numero = m.AUTO_NUMERO		--JOIN [NOCURSOMASLOSSABADOS].[Auto_Modelo] am ON am.auto_modelo_descripcion = m.AUTO_MODELO		order by CODIGO_CARRERA	END
+		
+	--select * from [NOCURSOMASLOSSABADOS].Auto order by auto_escuderia
+	--select * from [NOCURSOMASLOSSABADOS].Auto_Modelo
+	--select * from [NOCURSOMASLOSSABADOS].Carrera
+	
+	--am 6 (FW28) -   carr 1  -  tiene al auto_numero 1 y 2    -- son los auto codigo 10 y 8
 
-	select * from [NOCURSOMASLOSSABADOS].Auto_Modelo
-	select * from [NOCURSOMASLOSSABADOS].Carrera
-
-	--am 6 (FW28) -   carr 1
-	--am 7 (R26)  -   carr 1
-
-	--select * FROM gd_esquema.Maestra m where 
+	--select distinct AUTO_MODELO, AUTO_NUMERO, CODIGO_CARRERA FROM gd_esquema.Maestra m where CODIGO_CARRERA = 1 order by AUTO_MODELO
+	
+	 
 
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Bandera(
-		bandera_codigo int NOT NULL,
+		bandera_codigo int identity(1,1) NOT NULL,
 		bandera_color nvarchar(255),
 		CONSTRAINT PK_BANDERA PRIMARY KEY(bandera_codigo)
 	)
 
+	-- Carga de tabla Bandera
+	CREATE PROCEDURE cargar_tabla_bandera	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Bandera (bandera_color)		SELECT distinct			INCIDENTE_BANDERA		FROM gd_esquema.Maestra		WHERE INCIDENTE_BANDERA IS NOT NULL	END
+	
+
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Sector_Tipo(
-		sector_tipo_codigo int NOT NULL,
+		sector_tipo_codigo int identity(1,1) NOT NULL,
 		sector_tipo_descripcion nvarchar(255),
-		CONSTRAINT PK_SECTOR PRIMARY KEY(sector_tipo_codigo)
+		CONSTRAINT PK_SECTOR_TIPO PRIMARY KEY(sector_tipo_codigo)
 	)
+
+	-- Carga de tabla Sector_tipo
+	CREATE PROCEDURE cargar_tabla_sector_tipo	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Sector_Tipo (sector_tipo_descripcion)		SELECT distinct			SECTO_TIPO		FROM gd_esquema.Maestra	END
+
 
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Sector(
 		sector_codigo int NOT NULL,
@@ -137,39 +147,72 @@ BEGIN
 		sector_distancia decimal(18,2),
 		sector_tipo int,
 		CONSTRAINT PK_SECTOR PRIMARY KEY(sector_codigo),
+		CONSTRAINT FK_id_SECTOR_CIRCUITO FOREIGN KEY(sector_circuito) REFERENCES [NOCURSOMASLOSSABADOS].[Circuito](circuito_codigo),
 		CONSTRAINT FK_id_TIPO_SECTOR FOREIGN KEY(sector_tipo) REFERENCES [NOCURSOMASLOSSABADOS].[Sector_Tipo](sector_tipo_codigo)
 	)
 
+	-- Carga de tabla Sector
+	CREATE PROCEDURE cargar_tabla_sector	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Sector (sector_codigo, sector_circuito, sector_distancia, sector_tipo)		SELECT distinct			CODIGO_SECTOR,			CIRCUITO_CODIGO,			SECTOR_DISTANCIA,			st.sector_tipo_codigo		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Sector_Tipo] st ON st.sector_tipo_descripcion = m.SECTO_TIPO		ORDER BY CODIGO_SECTOR	END
 
-	CREATE TABLE [NOCURSOMASLOSSABADOS].Auto_Incidente(
-		auto_incidente_codigo int NOT NULL,
-		auto_incidente_auto int,
-		auto_incidente_incidente_codigo int,
-		auto_incidente_tipo int,
-		auto_incidente_numero_vuelta decimal(18,0),
-		CONSTRAINT PK_AUTO_INCIDENTE PRIMARY KEY(auto_incidente_codigo),
-		CONSTRAINT FK_id_AUTO FOREIGN KEY(auto_incidente_auto) REFERENCES [NOCURSOMASLOSSABADOS].[Auto](Auto_codigo),
-		CONSTRAINT FK_id_INCIDENTE FOREIGN KEY(auto_incidente_incidente_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Incidente](incidente_codigo),
-		CONSTRAINT FK_id_INCIDENTE_TIPO FOREIGN KEY(auto_incidente_tipo) REFERENCES [NOCURSOMASLOSSABADOS].[Incidente_Tipo](incidente_tipo_codigo)
-	)
+
+
 
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Incidente_Tipo(
-		incidente_tipo_codigo int NOT NULL,
+		incidente_tipo_codigo int identity(1,1) NOT NULL,
 		incidente_tipo_descripcion nvarchar(255),
 		CONSTRAINT PK_INCIDENTE_TIPO PRIMARY KEY(incidente_tipo_codigo)
 	)
 
+	-- Carga de tabla Incidente_tipo
+	CREATE PROCEDURE cargar_tabla_incidente_tipo	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Incidente_Tipo (incidente_tipo_descripcion)		SELECT distinct			INCIDENTE_TIPO		FROM gd_esquema.Maestra		WHERE INCIDENTE_TIPO IS NOT NULL	END
+
+
+
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Incidente(
-		incidente_codigo int NOT NULL,
+		incidente_codigo int identity(1,1) NOT NULL,
 		incidente_sector int,
 		incidente_carrera int,
 		incidente_tiempo decimal(18,2),
 		incidente_bandera int,
 		CONSTRAINT PK_INCIDENTE PRIMARY KEY(incidente_codigo),
-		CONSTRAINT FK_id_CARRERA FOREIGN KEY(incidente_carrera) REFERENCES [NOCURSOMASLOSSABADOS].[Carrera](carrera_codigo),
-		CONSTRAINT FK_id_SECTOR FOREIGN KEY(incidente_sector) REFERENCES [NOCURSOMASLOSSABADOS].[Sector](sector_codigo),
+		CONSTRAINT FK_id_INCIDENTE_CARRERA FOREIGN KEY(incidente_carrera) REFERENCES [NOCURSOMASLOSSABADOS].[Carrera](carrera_codigo),
+		CONSTRAINT FK_id_INCIDENTE_SECTOR FOREIGN KEY(incidente_sector) REFERENCES [NOCURSOMASLOSSABADOS].[Sector](sector_codigo),
 		CONSTRAINT FK_id_BANDERA FOREIGN KEY(incidente_bandera) REFERENCES [NOCURSOMASLOSSABADOS].[Bandera](bandera_codigo)
 	)
+
+	-- Carga de tabla Incidente
+	--OJO QUE EN EL CODIGO_SECTOR 36 HAY DOS INCIDENTES TIEMPO IGUALES. VER SI EST'A BIEN O NO QUE ESTA TABLA SOLO SE CARGUE UNA VEZ CON ESE DATO O QUE
+	CREATE PROCEDURE cargar_tabla_incidente	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Incidente (incidente_sector, incidente_carrera, incidente_tiempo, incidente_bandera)		SELECT distinct			CODIGO_SECTOR,			CODIGO_CARRERA,			INCIDENTE_TIEMPO,			b.bandera_codigo		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Bandera] b ON b.bandera_color = m.INCIDENTE_BANDERA	END
+
+
+
+	CREATE TABLE [NOCURSOMASLOSSABADOS].Auto_Incidente(
+		auto_incidente_codigo int identity(1,1) NOT NULL,
+		auto_incidente_auto int,
+		auto_incidente_incidente_codigo int,
+		auto_incidente_tipo int,
+		auto_incidente_numero_vuelta decimal(18,0),
+		CONSTRAINT PK_AUTO_INCIDENTE PRIMARY KEY(auto_incidente_codigo),
+		CONSTRAINT FK_id_INCIDENTE_AUTO FOREIGN KEY(auto_incidente_auto) REFERENCES [NOCURSOMASLOSSABADOS].[Auto](Auto_codigo),
+		CONSTRAINT FK_id_INCIDENTE FOREIGN KEY(auto_incidente_incidente_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Incidente](incidente_codigo),
+		CONSTRAINT FK_id_INCIDENTE_TIPO FOREIGN KEY(auto_incidente_tipo) REFERENCES [NOCURSOMASLOSSABADOS].[Incidente_Tipo](incidente_tipo_codigo)
+	)
+
+	-- Carga de tabla Auto_incidente
+	--CHEQUEAR ESTE. tiene que devolver 60 filas creo. NO SALIO
+	CREATE PROCEDURE cargar_tabla_auto_incidente	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Auto_Incidente 			(auto_incidente_auto, auto_incidente_incidente_codigo, auto_incidente_tipo, auto_incidente_numero_vuelta)		SELECT distinct			a.auto_codigo,			i.incidente_codigo,			it.incidente_tipo_codigo		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Auto] a ON a.auto_numero = m.AUTO_NUMERO			--JOIN [NOCURSOMASLOSSABADOS].[Auto_Modelo] am ON am.auto_modelo_descripcion = m.AUTO_MODELO		JOIN [NOCURSOMASLOSSABADOS].[Incidente] i ON 								i.incidente_sector = m.CODIGO_SECTOR								AND i.incidente_carrera = m.CODIGO_CARRERA								AND i.incidente_tiempo = m.INCIDENTE_TIEMPO		JOIN [NOCURSOMASLOSSABADOS].[Incidente_Tipo] it ON it.incidente_tipo_descripcion = m.INCIDENTE_TIPO		--WHERE INCIDENTE_NUMERO_VUELTA IS NOT NULL	END
+
+	SELECT distinct		a.auto_codigo,		i.incidente_codigo	FROM gd_esquema.Maestra m	JOIN [NOCURSOMASLOSSABADOS].[Auto] a ON a.auto_numero = m.AUTO_NUMERO
+	JOIN [NOCURSOMASLOSSABADOS].[Incidente] i ON 							i.incidente_tiempo = m.INCIDENTE_TIEMPO
+
+
+	SELECT * FROM gd_esquema.Maestra WHERE INCIDENTE_TIEMPO IS NOT NULL AND AUTO_MODELO = 'F1.06'
+	select * from [NOCURSOMASLOSSABADOS].[Incidente]
+	select * from [NOCURSOMASLOSSABADOS].[Auto_Modelo]
+	select * from [NOCURSOMASLOSSABADOS].[Auto]
+
+
+
 
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Motor_Medicion(
 		medicion_codigo int NOT NULL,
