@@ -8,4 +8,4 @@
 ## Primera entrega
 [Der](https://github.com/PabloOrtiz07/GestionDeDatos/blob/main/Der.pdf)
 ## Segunda entrega
-[ScripInicial](https://github.com/PabloOrtiz07/GestionDeDatos/blob/main/script_creacion_inicial.sql)
+[Script Inicial](https://github.com/PabloOrtiz07/GestionDeDatos/blob/main/script_creacion_inicial.sql)
