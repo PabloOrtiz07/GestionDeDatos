@@ -17,7 +17,7 @@ CREATE TABLE [NOCURSOMASLOSSABADOS].Escuderia(
 	escuderia_nombre nvarchar(255),
 	escuderia_pais int,
 	CONSTRAINT PK_ESCUDERIA PRIMARY KEY(escuderia_codigo),
-	CONSTRAINT FK_id_EscuderiaPais FOREIGN KEY(escuderia_pais) REFERENCES [NOCURSOMASLOSSABADOS].[Pais](pais_codigo)
+	CONSTRAINT FK_id_PAIS FOREIGN KEY(escuderia_pais) REFERENCES [NOCURSOMASLOSSABADOS].[Pais](pais_codigo)
 )
 
 CREATE TABLE [NOCURSOMASLOSSABADOS].Auto_Modelo (
@@ -34,8 +34,8 @@ CREATE TABLE [NOCURSOMASLOSSABADOS].Auto (
   auto_modelo int,
   auto_numero int,
   CONSTRAINT PK_AUTO PRIMARY KEY(auto_codigo),
-  CONSTRAINT FK_id_AutoModelo FOREIGN KEY(auto_modelo) REFERENCES [Auto_Modelo](auto_modelo_codigo),
-  CONSTRAINT FK_id_AutoEscuderia FOREIGN KEY(auto_escuderia) REFERENCES [NOCURSOMASLOSSABADOS].[Escuderia](escuderia_codigo)
+  CONSTRAINT FK_id_AUTO_MODELO FOREIGN KEY(auto_modelo) REFERENCES [Auto_Modelo](auto_modelo_codigo),
+  CONSTRAINT FK_id_AUTO_ESCUDERIA FOREIGN KEY(auto_escuderia) REFERENCES [NOCURSOMASLOSSABADOS].[Escuderia](escuderia_codigo)
 )
 
 
@@ -47,7 +47,7 @@ CREATE TABLE [NOCURSOMASLOSSABADOS].Piloto(
 	piloto_pais int,
 	piloto_fecha_nacimiento date
 	CONSTRAINT PK_PILOTO PRIMARY KEY(piloto_codigo)
-	CONSTRAINT FK_id_PilotoPais FOREIGN KEY(piloto_pais) REFERENCES[NOCURSOMASLOSSABADOS].[Pais](pais_codigo)
+	CONSTRAINT FK_id_PAIS FOREIGN KEY(piloto_pais) REFERENCES[NOCURSOMASLOSSABADOS].[Pais](pais_codigo)
 )
 
 
@@ -57,7 +57,7 @@ CREATE TABLE [NOCURSOMASLOSSABADOS].Circuito(
 	circuito_nombre nvarchar(255),
 	circuito_pais int,
 	CONSTRAINT PK_CIRCUITO PRIMARY KEY(circuito_codigo),
-	CONSTRAINT FK_id_CircuitoPais FOREIGN KEY(circuito_pais) REFERENCES [NOCURSOMASLOSSABADOS].[Pais](pais_codigo)
+	CONSTRAINT FK_id_PAIS FOREIGN KEY(circuito_pais) REFERENCES [NOCURSOMASLOSSABADOS].[Pais](pais_codigo)
 )
 
 CREATE TABLE [NOCURSOMASLOSSABADOS].Carrera(
@@ -67,7 +67,7 @@ CREATE TABLE [NOCURSOMASLOSSABADOS].Carrera(
 	carrera_fecha date,
 	carrera_clima nvarchar(100),
 	CONSTRAINT PK_CARRERA PRIMARY KEY(carrera_codigo),
-	CONSTRAINT FK_id_CarreraCircuito FOREIGN KEY(carrera_circuito) REFERENCES [NOCURSOMASLOSSABADOS].[Circuito](circuito_codigo)
+	CONSTRAINT FK_id_CIRCUITO FOREIGN KEY(carrera_circuito) REFERENCES [NOCURSOMASLOSSABADOS].[Circuito](circuito_codigo)
 )
 
 CREATE TABLE [NOCURSOMASLOSSABADOS].Auto_Carrera(
