@@ -199,52 +199,81 @@ BEGIN
 	)
 
 	-- Carga de tabla Auto_incidente
-	--CHEQUEAR ESTE. tiene que devolver 60 filas creo. NO SALIO
-	CREATE PROCEDURE cargar_tabla_auto_incidente	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Auto_Incidente 			(auto_incidente_auto, auto_incidente_incidente_codigo, auto_incidente_tipo, auto_incidente_numero_vuelta)		SELECT distinct			a.auto_codigo,			i.incidente_codigo,			it.incidente_tipo_codigo		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Auto] a ON a.auto_numero = m.AUTO_NUMERO			--JOIN [NOCURSOMASLOSSABADOS].[Auto_Modelo] am ON am.auto_modelo_descripcion = m.AUTO_MODELO		JOIN [NOCURSOMASLOSSABADOS].[Incidente] i ON 								i.incidente_sector = m.CODIGO_SECTOR								AND i.incidente_carrera = m.CODIGO_CARRERA								AND i.incidente_tiempo = m.INCIDENTE_TIEMPO		JOIN [NOCURSOMASLOSSABADOS].[Incidente_Tipo] it ON it.incidente_tipo_descripcion = m.INCIDENTE_TIPO		--WHERE INCIDENTE_NUMERO_VUELTA IS NOT NULL	END
+	--CHEQUEAR ESTE. tiene que devolver 60 filas creo. chequear pq puede estar mal tranquilamente
+	CREATE PROCEDURE cargar_tabla_auto_incidente	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Auto_Incidente 			(auto_incidente_auto, auto_incidente_incidente_codigo, auto_incidente_tipo, auto_incidente_numero_vuelta)		SELECT distinct			a.auto_codigo,			i.incidente_codigo,			it.incidente_tipo_codigo,			m.INCIDENTE_NUMERO_VUELTA		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Auto_Modelo] am ON am.auto_modelo_descripcion = m.AUTO_MODELO		JOIN [NOCURSOMASLOSSABADOS].[Auto] a ON a.auto_modelo = am.auto_modelo_codigo AND a.auto_numero = m.AUTO_NUMERO		JOIN [NOCURSOMASLOSSABADOS].[Incidente] i ON 								i.incidente_sector = m.CODIGO_SECTOR								AND i.incidente_carrera = m.CODIGO_CARRERA								AND i.incidente_tiempo = m.INCIDENTE_TIEMPO		JOIN [NOCURSOMASLOSSABADOS].[Incidente_Tipo] it ON it.incidente_tipo_descripcion = m.INCIDENTE_TIPO		WHERE INCIDENTE_NUMERO_VUELTA IS NOT NULL	END
+	
 
-	SELECT distinct		a.auto_codigo,		i.incidente_codigo	FROM gd_esquema.Maestra m	JOIN [NOCURSOMASLOSSABADOS].[Auto] a ON a.auto_numero = m.AUTO_NUMERO
-	JOIN [NOCURSOMASLOSSABADOS].[Incidente] i ON 							i.incidente_tiempo = m.INCIDENTE_TIEMPO
-
-
-	SELECT * FROM gd_esquema.Maestra WHERE INCIDENTE_TIEMPO IS NOT NULL AND AUTO_MODELO = 'F1.06'
-	select * from [NOCURSOMASLOSSABADOS].[Incidente]
-	select * from [NOCURSOMASLOSSABADOS].[Auto_Modelo]
-	select * from [NOCURSOMASLOSSABADOS].[Auto]
+	--SELECT * FROM gd_esquema.Maestra WHERE INCIDENTE_TIEMPO IS NOT NULL AND AUTO_MODELO = 'RA106'
+	--select * from [NOCURSOMASLOSSABADOS].[Incidente]
+	--select * from [NOCURSOMASLOSSABADOS].[Incidente_Tipo]
+	--select * from [NOCURSOMASLOSSABADOS].[Auto_Modelo] --'RA106' es auto_modelo_codigo 3
+	--select * from [NOCURSOMASLOSSABADOS].[Auto] --q lo tienen auto 11 O 18
 
 
 
 
-	CREATE TABLE [NOCURSOMASLOSSABADOS].Motor_Medicion(
-		medicion_codigo int NOT NULL,
+		CREATE TABLE [NOCURSOMASLOSSABADOS].Medicion(
+		medicion_codigo decimal(18,0) NOT NULL,
 		medicion_auto_carrera int,
 		medicion_sector int,
 		medicion_numero_vuelta decimal(18,0),
 		medicion_distancia_carrera decimal(18,6),
 		medicion_distancia_vuelta decimal(18,2),
+		medicion_tiempo_vuelta decimal(18,10),
 		medicion_posicion decimal(18,0),
 		medicion_velocidad decimal(18,2),
 		medicion_combustible decimal(18,2),
 		CONSTRAINT PK_MEDICION PRIMARY KEY(medicion_codigo),
-		CONSTRAINT FK_id_CARRERA FOREIGN KEY(medicion_auto_carrera) REFERENCES [NOCURSOMASLOSSABADOS].[Carrera](carrera_codigo),
-		CONSTRAINT FK_id_SECTOR FOREIGN KEY(medicion_sector) REFERENCES [NOCURSOMASLOSSABADOS].[Sector](sector_codigo)
+		CONSTRAINT FK_id_medicion_AUTO_CARRERA FOREIGN KEY(medicion_auto_carrera) REFERENCES [NOCURSOMASLOSSABADOS].[Auto_Carrera](auto_carrera_codigo),
+		CONSTRAINT FK_id_medicion_SECTOR FOREIGN KEY(medicion_sector) REFERENCES [NOCURSOMASLOSSABADOS].[Sector](sector_codigo)
 	)
 
+	-- Carga de tabla Medicion
+	---creo que tiene que dar 218641 filas
+	--CHEQUEAR que es importamte y dificil.
+	CREATE PROCEDURE cargar_tabla_medicion	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Medicion 			(medicion_codigo, medicion_auto_carrera, medicion_sector, medicion_numero_vuelta, medicion_distancia_carrera, 			medicion_distancia_vuelta, medicion_tiempo_vuelta, medicion_posicion, medicion_velocidad, medicion_combustible)		SELECT distinct			m.TELE_AUTO_CODIGO,			ac.auto_carrera_codigo,			m.CODIGO_SECTOR,			m.TELE_AUTO_NUMERO_VUELTA,			m.TELE_AUTO_DISTANCIA_CARRERA,			m.TELE_AUTO_DISTANCIA_VUELTA,			m.TELE_AUTO_TIEMPO_VUELTA,			m.TELE_AUTO_POSICION,			m.TELE_AUTO_VELOCIDAD,			m.TELE_AUTO_COMBUSTIBLE		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Auto_Modelo] am ON am.auto_modelo_descripcion = m.AUTO_MODELO		JOIN [NOCURSOMASLOSSABADOS].[Auto] a ON a.auto_modelo = am.auto_modelo_codigo AND a.auto_numero = m.AUTO_NUMERO		JOIN [NOCURSOMASLOSSABADOS].[Auto_Carrera] ac ON ac.auto_carrera_auto = a.auto_codigo AND ac.auto_carrera_carrera = m.CODIGO_CARRERA		WHERE TELE_AUTO_CODIGO IS NOT NULL	END
+
+		select * from [NOCURSOMASLOSSABADOS].Medicion 
+
+--el tele_auto_codigo 1 es del modelo 248 F1   auto_numero 1  . es el autocarrera 17. que es auto 12   carrera 1. auto modelo =2
+--el tele_auto_codigo 120830 es del modelo SA05   auto_numero 1  . el autocarrera 63. que es auto 7   carrera 4. auto modelo =8
+--select * from [NOCURSOMASLOSSABADOS].Auto_Carrera
+--select * from [NOCURSOMASLOSSABADOS].Auto
+--select * from [NOCURSOMASLOSSABADOS].Auto_Modelo
+
+
+
+
+
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Motor_Modelo(
-		motor_modelo_codigo int NOT NULL,
-		motor_descripcion nvarchar(255),
+		motor_modelo_codigo int identity(1,1) NOT NULL,
+		motor_modelo_descripcion nvarchar(255),
 		CONSTRAINT PK_MOTOR PRIMARY KEY(motor_modelo_codigo),
 	)
+
+	-- Carga de tabla Motor_Modelo
+	CREATE PROCEDURE cargar_tabla_motor_modelo	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Motor_Modelo (motor_modelo_descripcion)		SELECT distinct			TELE_MOTOR_MODELO		FROM gd_esquema.Maestra		WHERE TELE_MOTOR_MODELO IS NOT NULL	END
+
+
 
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Motor(
 		motor_numero_serie nvarchar(255) NOT NULL,
 		motor_modelo int,
-		CONSTRAINT PK_MOTOR PRIMARY KEY(motor_numero_serie),
+		CONSTRAINT PK_MOTOR_nor_serie PRIMARY KEY(motor_numero_serie),
 		CONSTRAINT FK_id_MOTOR_MODELO FOREIGN KEY(motor_modelo) REFERENCES [NOCURSOMASLOSSABADOS].[Motor_Modelo](motor_modelo_codigo)
-	
 	)
 
+	-- Carga de tabla Motor
+	--NO SE CARGA EN ORDEN NOSE PORQUE
+	CREATE PROCEDURE cargar_tabla_motor	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Motor (motor_numero_serie, motor_modelo)		SELECT distinct			TELE_MOTOR_NRO_SERIE,			mm.motor_modelo_codigo		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Motor_Modelo] mm ON mm.motor_modelo_descripcion = m.TELE_MOTOR_MODELO		WHERE TELE_MOTOR_NRO_SERIE IS NOT NULL		ORDER BY mm.motor_modelo_codigo	END
+
+	select * from [NOCURSOMASLOSSABADOS].Motor 
+
+
+
+	
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Motor_Medicion(
-		motor_medicion_codigo int NOT NULL,
+		motor_medicion_codigo int identity(1,1) NOT NULL,
 		motor_medicion_medicion decimal(18,0),
 		motor_medicion_motor_numero_serie nvarchar(255),
 		motor_medicion_potencia decimal(18,6),
@@ -256,11 +285,22 @@ BEGIN
 		CONSTRAINT FK_id_MOTOR FOREIGN KEY(motor_medicion_motor_numero_serie) REFERENCES [NOCURSOMASLOSSABADOS].[Motor](motor_numero_serie)
 	)
 
+	-- Carga de tabla motor_medicion
+	--chequear. devuelve el mismo numero que la tabla Medicion. estará bien eso?
+	CREATE PROCEDURE cargar_tabla_motor_medicion	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Motor_Medicion 			(motor_medicion_medicion, motor_medicion_motor_numero_serie, motor_medicion_potencia,			motor_medicion_temperatura_aceite, motor_medicion_temperatura_agua, motor_medicion_rpm)		SELECT distinct			med.medicion_codigo,			m.TELE_MOTOR_NRO_SERIE,			m.TELE_MOTOR_POTENCIA, 			m.TELE_MOTOR_TEMP_ACEITE,			m.TELE_MOTOR_TEMP_AGUA,			m.TELE_MOTOR_RPM		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Medicion] med ON med.medicion_codigo = m.TELE_AUTO_CODIGO	END
+
+	
+
+
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Modelo(
-		caja_modelo_codigo int NOT NULL,
-		caja_modelo_descripcion nvarchar(255),
-		CONSTRAINT PK_MOTOR PRIMARY KEY(caja_modelo_codigo),
+		caja_modelo_codigo int identity(1,1) NOT NULL,
+		caja_modelo_descripcion nvarchar(50),
+		CONSTRAINT PK_CAJA_CAMBIO PRIMARY KEY(caja_modelo_codigo),
 	)
+
+	-- Carga de tabla Caja_De_Cambio_Modelo
+	CREATE PROCEDURE cargar_tabla_caja_de_cambio_modelo	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Modelo (caja_modelo_descripcion)		SELECT distinct			TELE_CAJA_MODELO		FROM gd_esquema.Maestra		WHERE TELE_CAJA_MODELO IS NOT NULL	END
+
 
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Caja_de_cambio(
 		caja_numero_serie nvarchar(255) NOT NULL,
@@ -269,41 +309,76 @@ BEGIN
 		CONSTRAINT FK_id_CAJA_DE_CAMBIO_MODELO FOREIGN KEY(caja_modelo) REFERENCES [NOCURSOMASLOSSABADOS].[Caja_De_Cambio_Modelo](caja_modelo_codigo)	
 	)
 
+	-- Carga de tabla Caja_De_Cambio
+	--NO SE CARGA EN ORDEN NOSE PORQUE
+	CREATE PROCEDURE cargar_tabla_caja_de_cambio	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Caja_De_Cambio (caja_numero_serie, caja_modelo)		SELECT distinct			m.TELE_CAJA_NRO_SERIE,			ccm.caja_modelo_codigo		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Caja_De_Cambio_Modelo] ccm ON ccm.caja_modelo_descripcion = m.TELE_CAJA_MODELO		WHERE M.TELE_CAJA_NRO_SERIE IS NOT NULL		ORDER BY CCM.caja_modelo_codigo	END
+
+
+
+
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Medicion(
-		caja_medicion_codigo int NOT NULL,
+		caja_medicion_codigo int identity(1,1) NOT NULL,
 		caja_medicion_medicion decimal(18,0),
 		caja_medicion_caja_numero_serie nvarchar(255),
 		caja_medicion_temperatura_aceite decimal(18,2),
 		caja_medicion_rpm decimal(18,2),
 		caja_medicion_desgaste decimal(18,2),
 		CONSTRAINT PK_CAJA_DE_CAMBIO_MEDICION PRIMARY KEY(caja_medicion_codigo),
-		CONSTRAINT FK_id_MEDICION FOREIGN KEY(caja_medicion_medicion) REFERENCES [NOCURSOMASLOSSABADOS].[Medicion](medicion_codigo),
+		CONSTRAINT FK_id_CAJA_MEDICION FOREIGN KEY(caja_medicion_medicion) REFERENCES [NOCURSOMASLOSSABADOS].[Medicion](medicion_codigo),
 		CONSTRAINT FK_id_CAJA_DE_CAMBIO FOREIGN KEY(caja_medicion_caja_numero_serie) REFERENCES [NOCURSOMASLOSSABADOS].[Caja_De_Cambio](caja_numero_serie)
 	)
 
+	-- Carga de tabla Caja_De_Cambio_medicion
+	--igual que el motor_medicion
+	CREATE PROCEDURE cargar_tabla_caja_de_cambio_medicion	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Medicion 			(caja_medicion_medicion, caja_medicion_caja_numero_serie, caja_medicion_temperatura_aceite, caja_medicion_rpm, caja_medicion_desgaste)		SELECT distinct			med.medicion_codigo,			m.TELE_CAJA_NRO_SERIE,			m.TELE_CAJA_TEMP_ACEITE,			m.TELE_CAJA_RPM,			m.TELE_CAJA_DESGASTE		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Medicion] med ON med.medicion_codigo = m.TELE_AUTO_CODIGO	END
+
+
+
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Posicion(
-		posicion_codigo int NOT NULL,
+		posicion_codigo int identity(1,1) NOT NULL,
 		posicion_posicion nvarchar(255),
 		CONSTRAINT PK_POSICION PRIMARY KEY(posicion_codigo)	
 	)
 
+	-- Carga de tabla Posicion
+	--SUPONGO QUE NO TIENE QUE HABER NULL NO?
+	--ver si hay manera mejor de hacerlo
+	CREATE PROCEDURE cargar_tabla_posicion	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Posicion (posicion_posicion)			(select NEUMATICO1_POSICION_NUEVO from gd_esquema.Maestra where NEUMATICO1_POSICION_NUEVO is not null) union			(select NEUMATICO1_POSICION_VIEJO from gd_esquema.Maestra where NEUMATICO1_POSICION_VIEJO is not null) union			(select NEUMATICO2_POSICION_NUEVO from gd_esquema.Maestra where NEUMATICO2_POSICION_NUEVO is not null) union			(select NEUMATICO2_POSICION_VIEJO from gd_esquema.Maestra where NEUMATICO2_POSICION_VIEJO is not null) union			(select NEUMATICO3_POSICION_NUEVO from gd_esquema.Maestra where NEUMATICO3_POSICION_NUEVO is not null) union			(select NEUMATICO3_POSICION_VIEJO from gd_esquema.Maestra where NEUMATICO3_POSICION_VIEJO is not null) union			(select NEUMATICO4_POSICION_NUEVO from gd_esquema.Maestra where NEUMATICO4_POSICION_NUEVO is not null) union			(select NEUMATICO4_POSICION_VIEJO from gd_esquema.Maestra where NEUMATICO4_POSICION_VIEJO is not null) union			(select TELE_NEUMATICO1_POSICION from gd_esquema.Maestra where TELE_NEUMATICO1_POSICION is not null) union			(select TELE_NEUMATICO2_POSICION from gd_esquema.Maestra where TELE_NEUMATICO2_POSICION is not null) union			(select TELE_NEUMATICO3_POSICION from gd_esquema.Maestra where TELE_NEUMATICO3_POSICION is not null) union			(select TELE_NEUMATICO4_POSICION from gd_esquema.Maestra where TELE_NEUMATICO4_POSICION is not null) union			(select TELE_FRENO1_POSICION from gd_esquema.Maestra where TELE_FRENO1_POSICION is not null) union			(select TELE_FRENO2_POSICION from gd_esquema.Maestra where TELE_FRENO2_POSICION is not null) union			(select TELE_FRENO3_POSICION from gd_esquema.Maestra where TELE_FRENO3_POSICION is not null) union			(select TELE_FRENO4_POSICION from gd_esquema.Maestra where TELE_FRENO4_POSICION is not null)	END
+
+	
+
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Freno(
 		freno_numero_serie nvarchar(255) NOT NULL,
 		freno_posicion int,
+		freno_tamanio_disco decimal(18,2)
 		CONSTRAINT PK_FRENO PRIMARY KEY(freno_numero_serie),
 		CONSTRAINT FK_id_POSICION FOREIGN KEY(freno_posicion) REFERENCES [NOCURSOMASLOSSABADOS].[Posicion](posicion_codigo)	
 	)
 
+	-- Carga de tabla Freno
+	--no se carga ordenado
+	CREATE PROCEDURE cargar_tabla_freno	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Freno (freno_numero_serie, freno_posicion, freno_tamanio_disco)			(select TELE_FRENO1_NRO_SERIE, p.posicion_codigo, TELE_FRENO1_TAMANIO_DISCO			from gd_esquema.Maestra m			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p ON p.posicion_posicion = m.TELE_FRENO1_POSICION			where TELE_FRENO1_NRO_SERIE is not null			) 		union			(select TELE_FRENO2_NRO_SERIE, p1.posicion_codigo, TELE_FRENO2_TAMANIO_DISCO			from gd_esquema.Maestra m2			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p1 ON p1.posicion_posicion = m2.TELE_FRENO2_POSICION			where TELE_FRENO2_NRO_SERIE is not null			) 		union			(select TELE_FRENO3_NRO_SERIE, p2.posicion_codigo, TELE_FRENO3_TAMANIO_DISCO			from gd_esquema.Maestra m3			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p2 ON p2.posicion_posicion = m3.TELE_FRENO3_POSICION			where TELE_FRENO3_NRO_SERIE is not null			) 		union			(select TELE_FRENO4_NRO_SERIE, p3.posicion_codigo, TELE_FRENO4_TAMANIO_DISCO			from gd_esquema.Maestra m4			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p3 ON p3.posicion_posicion = m4.TELE_FRENO4_POSICION			where TELE_FRENO4_NRO_SERIE is not null)		order by 2	END
+	
+
+
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Freno_medicion(
-		freno_medicion_codigo int NOT NULL,
+		freno_medicion_codigo int identity(1,1) NOT NULL,
 		freno_medicion_medicion decimal(18,0),
 		freno_medicion_freno_numero_serie nvarchar(255),
 		freno_medicion_grosor decimal(18,2),
 		freno_medicion_temperatura decimal(18,2),
 		CONSTRAINT PK_FRENO_MEDICION PRIMARY KEY(freno_medicion_codigo),
-		CONSTRAINT FK_id_FRENO FOREIGN KEY(freno_medicion_freno_numero_serie) REFERENCES [NOCURSOMASLOSSABADOS].[Freno](freno_numero_serie),
-		CONSTRAINT FK_id_MEDICION FOREIGN KEY(freno_medicion_medicion) REFERENCES [NOCURSOMASLOSSABADOS].[Medicion](freno_medicon_medicion)
+		CONSTRAINT FK_id_FRENO_MEDICION FOREIGN KEY(freno_medicion_medicion) REFERENCES [NOCURSOMASLOSSABADOS].[Medicion](medicion_codigo),
+		CONSTRAINT FK_id_FRENO FOREIGN KEY(freno_medicion_freno_numero_serie) REFERENCES [NOCURSOMASLOSSABADOS].[Freno](freno_numero_serie)
 	)
+
+	-- Carga de tabla Freno_medicion
+	CREATE PROCEDURE cargar_tabla_freno_medicion	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Freno_medicion 			(freno_medicion_medicion, freno_medicion_freno_numero_serie, freno_medicion_grosor, freno_medicion_temperatura)		SELECT DISTINCT			--		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Freno] f ON f.freno_numero_serie = (select * FROM gd_esquema.Maestra m where )		END
+
+	/*
+	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Medicion 			(caja_medicion_medicion, caja_medicion_caja_numero_serie, caja_medicion_temperatura_aceite, caja_medicion_rpm, caja_medicion_desgaste)		SELECT distinct			med.medicion_codigo,			m.TELE_CAJA_NRO_SERIE,			m.TELE_CAJA_TEMP_ACEITE,			m.TELE_CAJA_RPM,			m.TELE_CAJA_DESGASTE		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Medicion] med ON med.medicion_codigo = m.TELE_AUTO_CODIGO	*/
+
+
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Neumatico_Tipo(
 		neumatico_tipo_codigo int NOT NULL,
 		neumatico_tipo_descripcion nvarchar(255),
