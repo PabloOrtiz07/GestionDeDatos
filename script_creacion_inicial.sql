@@ -373,17 +373,27 @@ BEGIN
 	)
 
 	-- Carga de tabla Freno_medicion
-	CREATE PROCEDURE cargar_tabla_freno_medicion	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Freno_medicion 			(freno_medicion_medicion, freno_medicion_freno_numero_serie, freno_medicion_grosor, freno_medicion_temperatura)		SELECT DISTINCT			--		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Freno] f ON f.freno_numero_serie = (select * FROM gd_esquema.Maestra m where )		END
+	--CHEQUEAR, PERO PARECE QUE ANDA BIEN.
+	CREATE PROCEDURE cargar_tabla_freno_medicion	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Freno_medicion 			(freno_medicion_medicion, freno_medicion_freno_numero_serie, freno_medicion_grosor, freno_medicion_temperatura)				(select med.medicion_codigo, TELE_FRENO1_NRO_SERIE, TELE_FRENO1_GROSOR_PASTILLA, TELE_FRENO1_TEMPERATURA			from gd_esquema.Maestra m0			JOIN [NOCURSOMASLOSSABADOS].[Medicion] med ON med.medicion_codigo = m0.TELE_AUTO_CODIGO			where TELE_FRENO1_NRO_SERIE is not null			) 		union			(select med.medicion_codigo, TELE_FRENO2_NRO_SERIE, TELE_FRENO2_GROSOR_PASTILLA, TELE_FRENO2_TEMPERATURA			from gd_esquema.Maestra m2			JOIN [NOCURSOMASLOSSABADOS].[Medicion] med ON med.medicion_codigo = m2.TELE_AUTO_CODIGO			where TELE_FRENO2_NRO_SERIE is not null			) 		union			(select med.medicion_codigo, TELE_FRENO3_NRO_SERIE, TELE_FRENO3_GROSOR_PASTILLA, TELE_FRENO3_TEMPERATURA			from gd_esquema.Maestra m3			JOIN [NOCURSOMASLOSSABADOS].[Medicion] med ON med.medicion_codigo = m3.TELE_AUTO_CODIGO			where TELE_FRENO3_NRO_SERIE is not null			) 		union			(select med.medicion_codigo, TELE_FRENO4_NRO_SERIE, TELE_FRENO4_GROSOR_PASTILLA, TELE_FRENO4_TEMPERATURA			from gd_esquema.Maestra m4			JOIN [NOCURSOMASLOSSABADOS].[Medicion] med ON med.medicion_codigo = m4.TELE_AUTO_CODIGO			where TELE_FRENO4_NRO_SERIE is not null)	END
 
-	/*
-	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Medicion 			(caja_medicion_medicion, caja_medicion_caja_numero_serie, caja_medicion_temperatura_aceite, caja_medicion_rpm, caja_medicion_desgaste)		SELECT distinct			med.medicion_codigo,			m.TELE_CAJA_NRO_SERIE,			m.TELE_CAJA_TEMP_ACEITE,			m.TELE_CAJA_RPM,			m.TELE_CAJA_DESGASTE		FROM gd_esquema.Maestra m		JOIN [NOCURSOMASLOSSABADOS].[Medicion] med ON med.medicion_codigo = m.TELE_AUTO_CODIGO	*/
+
+	--select * from [NOCURSOMASLOSSABADOS].Freno_medicion where freno_medicion_medicion = 81837
+	--select * from gd_esquema.Maestra where TELE_AUTO_CODIGO = 81837
+	--select * from [NOCURSOMASLOSSABADOS].Freno where freno_numero_serie = 'UQX921036' --trans izq
+
 
 
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Neumatico_Tipo(
-		neumatico_tipo_codigo int NOT NULL,
+		neumatico_tipo_codigo int identity(1,1) NOT NULL,
 		neumatico_tipo_descripcion nvarchar(255),
-		CONSTRAINT PK_MOTOR PRIMARY KEY(neumatico_tipo_codigo),
+		CONSTRAINT PK_NEUMATICO_TIPO PRIMARY KEY(neumatico_tipo_codigo),
 	)
+
+	-- Carga de tabla Neumatico_Tipo
+	CREATE PROCEDURE cargar_tabla_neumatico_tipo	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Neumatico_Tipo (neumatico_tipo_descripcion)			(select NEUMATICO1_TIPO_NUEVO from gd_esquema.Maestra where NEUMATICO1_TIPO_NUEVO is not null) union			(select NEUMATICO1_TIPO_VIEJO from gd_esquema.Maestra where NEUMATICO1_TIPO_VIEJO is not null) union			(select NEUMATICO2_TIPO_NUEVO from gd_esquema.Maestra where NEUMATICO2_TIPO_NUEVO is not null) union			(select NEUMATICO2_TIPO_VIEJO from gd_esquema.Maestra where NEUMATICO2_TIPO_VIEJO is not null) union			(select NEUMATICO3_TIPO_NUEVO from gd_esquema.Maestra where NEUMATICO3_TIPO_NUEVO is not null) union			(select NEUMATICO3_TIPO_VIEJO from gd_esquema.Maestra where NEUMATICO3_TIPO_VIEJO is not null) union			(select NEUMATICO4_TIPO_NUEVO from gd_esquema.Maestra where NEUMATICO4_TIPO_NUEVO is not null) union			(select NEUMATICO4_TIPO_VIEJO from gd_esquema.Maestra where NEUMATICO4_TIPO_VIEJO is not null)	END
+
+	
+
 
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Neumatico(
 		neumatico_numero_serie nvarchar(255) NOT NULL,
@@ -391,20 +401,47 @@ BEGIN
 		neumatico_posicion int,
 		CONSTRAINT PK_NEUMATICO PRIMARY KEY(neumatico_numero_serie),
 		CONSTRAINT FK_id_NEUMATICO_TIPO FOREIGN KEY(neumatico_tipo) REFERENCES [NOCURSOMASLOSSABADOS].[Neumatico_Tipo](neumatico_tipo_codigo),
-		CONSTRAINT FK_id_POSICION FOREIGN KEY(neumatico_posicion) REFERENCES [NOCURSOMASLOSSABADOS].[Posicion](posicion_codigo)	
+		CONSTRAINT FK_id_NEUMATICO_POSICION FOREIGN KEY(neumatico_posicion) REFERENCES [NOCURSOMASLOSSABADOS].[Posicion](posicion_codigo)	
 	)
 
+	-- Carga de tabla Neumatico
+	--nose si tengo que seleccionar de NEUMATICO y TELE_NEUMATICO ??????? pensar
+	--SEGURO SE OPDIA HACER ALGUNA FUNCION PARA TODO ESTO
+	--cheqeuar que puede estar re mal
+	CREATE PROCEDURE cargar_tabla_neumatico	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Neumatico (neumatico_numero_serie, neumatico_tipo, neumatico_posicion)			(select m0.NEUMATICO1_NRO_SERIE_NUEVO, t0.neumatico_tipo_codigo, p0.posicion_codigo			from gd_esquema.Maestra m0			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p0 ON p0.posicion_posicion = m0.NEUMATICO1_POSICION_NUEVO			JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t0 ON t0.neumatico_tipo_descripcion = m0.NEUMATICO1_TIPO_NUEVO			where m0.NEUMATICO1_NRO_SERIE_NUEVO is not null			) 		union			(select m1.NEUMATICO1_NRO_SERIE_VIEJO, t1.neumatico_tipo_codigo, p1.posicion_codigo			from gd_esquema.Maestra m1			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p1 ON p1.posicion_posicion = m1.NEUMATICO1_POSICION_VIEJO			JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t1 ON t1.neumatico_tipo_descripcion = m1.NEUMATICO1_TIPO_VIEJO			where m1.NEUMATICO1_NRO_SERIE_VIEJO is not null			) 		union			(select m2.NEUMATICO2_NRO_SERIE_NUEVO, t2.neumatico_tipo_codigo, p2.posicion_codigo			from gd_esquema.Maestra m2			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p2 ON p2.posicion_posicion = m2.NEUMATICO2_POSICION_NUEVO			JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t2 ON t2.neumatico_tipo_descripcion = m2.NEUMATICO2_TIPO_NUEVO			where m2.NEUMATICO2_NRO_SERIE_NUEVO is not null			) 		union			(select m3.NEUMATICO2_NRO_SERIE_VIEJO, t3.neumatico_tipo_codigo, p3.posicion_codigo			from gd_esquema.Maestra m3			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p3 ON p3.posicion_posicion = m3.NEUMATICO2_POSICION_VIEJO			JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t3 ON t3.neumatico_tipo_descripcion = m3.NEUMATICO2_TIPO_VIEJO			where m3.NEUMATICO2_NRO_SERIE_VIEJO is not null			) 		union			(select m4.NEUMATICO3_NRO_SERIE_NUEVO, t4.neumatico_tipo_codigo, p4.posicion_codigo			from gd_esquema.Maestra m4			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p4 ON p4.posicion_posicion = m4.NEUMATICO3_POSICION_NUEVO			JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t4 ON t4.neumatico_tipo_descripcion = m4.NEUMATICO3_TIPO_NUEVO			where m4.NEUMATICO3_NRO_SERIE_NUEVO is not null			) 		union			(select m5.NEUMATICO3_NRO_SERIE_VIEJO, t5.neumatico_tipo_codigo, p5.posicion_codigo			from gd_esquema.Maestra m5			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p5 ON p5.posicion_posicion = m5.NEUMATICO3_POSICION_VIEJO			JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t5 ON t5.neumatico_tipo_descripcion = m5.NEUMATICO3_TIPO_VIEJO			where m5.NEUMATICO3_NRO_SERIE_VIEJO is not null			) 		union			(select m6.NEUMATICO4_NRO_SERIE_NUEVO, t6.neumatico_tipo_codigo, p6.posicion_codigo			from gd_esquema.Maestra m6			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p6 ON p6.posicion_posicion = m6.NEUMATICO4_POSICION_NUEVO			JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t6 ON t6.neumatico_tipo_descripcion = m6.NEUMATICO4_TIPO_NUEVO			where m6.NEUMATICO4_NRO_SERIE_NUEVO is not null			) 		union			(select m7.NEUMATICO4_NRO_SERIE_VIEJO, t7.neumatico_tipo_codigo, p7.posicion_codigo			from gd_esquema.Maestra m7			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p7 ON p7.posicion_posicion = m7.NEUMATICO4_POSICION_VIEJO			JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t7 ON t7.neumatico_tipo_descripcion = m7.NEUMATICO4_TIPO_VIEJO			where m7.NEUMATICO4_NRO_SERIE_VIEJO is not null			) 				END
+
+	--select * from [NOCURSOMASLOSSABADOS].Neumatico_Tipo
+	--select * from [NOCURSOMASLOSSABADOS].Posicion
+	--ABC229817  tipo 2 DURO    posic 4  del der
+--select * from gd_esquema.Maestra where TELE_NEUMATICO1_NRO_SERIE = 'ABC229817'
+--select * from gd_esquema.Maestra where NEUMATICO1_NRO_SERIE_VIEJO = 'ABC229817'
+--select * from gd_esquema.Maestra where NEUMATICO1_NRO_SERIE_NUEVO = 'ABC229817'
+
+
+
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Neumatico_Medicion(
-		neumatico_medicion_codigo int NOT NULL,
+		neumatico_medicion_codigo int identity(1,1) NOT NULL,
 		neumatico_medicion_medicion decimal(18,0),
 		neumatico_medicion_neumatico_numero_serie nvarchar(255),
 		neumatico_medicion_profundidad decimal(18,6),
 		neumatico_medicion_presion decimal(18,6),
 		neumatico_medicion_temperatura decimal(18,6),
-		CONSTRAINT PK_NEUMATICO_MEDICION PRIMARY KEY(neumatico_numero_serie),
-		CONSTRAINT FK_id_MEDICION FOREIGN KEY(neumatico_medicion_medicion) REFERENCES [NOCURSOMASLOSSABADOS].[Medicion](medicion_codigo),
+		CONSTRAINT PK_NEUMATICO_MEDICION PRIMARY KEY(neumatico_medicion_codigo),
+		CONSTRAINT FK_id_NEUMATICO_MEDICION FOREIGN KEY(neumatico_medicion_medicion) REFERENCES [NOCURSOMASLOSSABADOS].[Medicion](medicion_codigo),
 		CONSTRAINT FK_id_NEUMATICO FOREIGN KEY(neumatico_medicion_neumatico_numero_serie) REFERENCES [NOCURSOMASLOSSABADOS].[Neumatico](neumatico_numero_serie)
 	)
+
+
+	-- Carga de tabla Neumatico_Medicion
+	--SEGURO SE OPDIA HACER ALGUNA FUNCION PARA TODO ESTO
+	--chequear. ni me fije si esta bien.
+	--NO FUNCIONA. 
+	CREATE PROCEDURE cargar_tabla_neumatico_medicion	AS	BEGIN		INSERT INTO [NOCURSOMASLOSSABADOS].Neumatico_Medicion 			(neumatico_medicion_medicion, neumatico_medicion_neumatico_numero_serie, neumatico_medicion_profundidad, 			neumatico_medicion_presion, neumatico_medicion_temperatura)						(select med.medicion_codigo, TELE_NEUMATICO1_NRO_SERIE, TELE_NEUMATICO1_PROFUNDIDAD, TELE_NEUMATICO1_PRESION, TELE_NEUMATICO1_TEMPERATURA			from gd_esquema.Maestra m0			JOIN [NOCURSOMASLOSSABADOS].[Medicion] med ON med.medicion_codigo = m0.TELE_AUTO_CODIGO			where TELE_NEUMATICO1_NRO_SERIE is not null			) 		union			(select med.medicion_codigo, TELE_NEUMATICO2_NRO_SERIE, TELE_NEUMATICO2_PROFUNDIDAD, TELE_NEUMATICO2_PRESION, TELE_NEUMATICO2_TEMPERATURA			from gd_esquema.Maestra m1			JOIN [NOCURSOMASLOSSABADOS].[Medicion] med ON med.medicion_codigo = m1.TELE_AUTO_CODIGO			where TELE_NEUMATICO2_NRO_SERIE is not null			) 		union			(select med.medicion_codigo, TELE_NEUMATICO3_NRO_SERIE, TELE_NEUMATICO3_PROFUNDIDAD, TELE_NEUMATICO3_PRESION, TELE_NEUMATICO3_TEMPERATURA			from gd_esquema.Maestra m3			JOIN [NOCURSOMASLOSSABADOS].[Medicion] med ON med.medicion_codigo = m3.TELE_AUTO_CODIGO			where TELE_NEUMATICO3_NRO_SERIE is not null			) 		union			(select med.medicion_codigo, TELE_NEUMATICO4_NRO_SERIE, TELE_NEUMATICO4_PROFUNDIDAD, TELE_NEUMATICO4_PRESION, TELE_NEUMATICO4_TEMPERATURA			from gd_esquema.Maestra m4			JOIN [NOCURSOMASLOSSABADOS].[Medicion] med ON med.medicion_codigo = m4.TELE_AUTO_CODIGO			where TELE_NEUMATICO4_NRO_SERIE is not null			) 	END
+
+	exec cargar_tabla_neumatico_medicion --no anda
+	select * from [NOCURSOMASLOSSABADOS].Neumatico_Medicion 
+
+	--select * from [NOCURSOMASLOSSABADOS].Neumatico
 
 
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Parada_Box(
