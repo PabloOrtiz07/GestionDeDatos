@@ -451,7 +451,6 @@ BEGIN
 		parada_auto_carrera int,
 		parada_numero_vuelta decimal(18,0),
 		parada_tiempo decimal(18,2),
-		parada_cambio_neumaticos int,
 		CONSTRAINT PK_PARADA_BOX PRIMARY KEY(parada_codigo),
 		CONSTRAINT FK_id_AUTO_CARRERA FOREIGN KEY(parada_auto_carrera) REFERENCES [NOCURSOMASLOSSABADOS].[Auto_Carrera](auto_carrera_codigo),
 	)
