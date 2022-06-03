@@ -619,7 +619,7 @@ BEGIN
 			(select TELE_FRENO3_POSICION from gd_esquema.Maestra where TELE_FRENO3_POSICION is not null) union
 			(select TELE_FRENO4_POSICION from gd_esquema.Maestra where TELE_FRENO4_POSICION is not null)
 	END
-
+	exec cargar_tabla_posicion
 	
 
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Freno(
@@ -718,7 +718,7 @@ BEGIN
 		neumatico_tipo_descripcion nvarchar(255),
 		CONSTRAINT PK_NEUMATICO_TIPO PRIMARY KEY(neumatico_tipo_codigo),
 	)
-
+	
 	-- Carga de tabla Neumatico_Tipo
 	CREATE PROCEDURE cargar_tabla_neumatico_tipo
 	AS
@@ -750,6 +750,9 @@ BEGIN
 	--nose si tengo que seleccionar de NEUMATICO y TELE_NEUMATICO ??????? pensar
 	--SEGURO SE OPDIA HACER ALGUNA FUNCION PARA TODO ESTO
 	--cheqeuar que puede estar re mal
+
+	
+	
 	CREATE PROCEDURE cargar_tabla_neumatico
 	AS
 	BEGIN
@@ -901,25 +904,32 @@ BEGIN
 	order by a.auto_carrera_codigo
 	END  
 
-	exec cargar_tabla_parada_box
-	select * from [NOCURSOMASLOSSABADOS].Parada_box 
-
-	CREATE TABLE [NOCURSOMASLOSSABADOS].Cambio_Neumatico(
-		cambio_neumatico_codigo int identity(1,1) NOT NULL,
-		cambio_neumatico_parada int,
-		CONSTRAINT PK_CAMBIO_NEUMATICO PRIMARY KEY(cambio_neumatico_codigo),
-		CONSTRAINT FK_id_PARADA_BOX FOREIGN KEY(cambio_neumatico_parada) REFERENCES [NOCURSOMASLOSSABADOS].[Parada_Box](parada_codigo),
-	)
 
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Cambio_Por_Neumatico(
 		cambio_por_neumatico_codigo int identity(1,1) NOT NULL,
-		cambio_neumatico_codigo int,
+		cambio_parada_box_codigo int,
 		cambio_por_neumatico_nuevo_codigo nvarchar(255),
 		cambio_por_neumatico_viejo_codigo nvarchar(255),
 		CONSTRAINT PK_CAMBIO_POR_NEUMATICO PRIMARY KEY(cambio_por_neumatico_codigo),
 		CONSTRAINT FK_id_NEUMATICO_NUEVO FOREIGN KEY(cambio_por_neumatico_nuevo_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Neumatico](neumatico_numero_serie),
 		CONSTRAINT FK_id_NEUMATICO_VIEJO FOREIGN KEY(cambio_por_neumatico_viejo_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Neumatico](neumatico_numero_serie),
-		CONSTRAINT FK_id_CAMBIO_NEUMATICO FOREIGN KEY(cambio_neumatico_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Cambio_neumatico](cambio_neumatico_codigo)
+		CONSTRAINT FK_id_PARADA_BOX FOREIGN KEY(cambio_parada_box_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Parada_Box](parada_box_codigo)
 	)
+
+
+	create procedure cargar_tabla_cambio_por_neumatico
+	AS
+	BEGIN
+	INSERT INTO [NOCURSOMASLOSSABADOS].Cambio_Por_Neumatico(
+		parada_box_codigo,
+		cambio_por_neumatico_nuevo_codigo,
+		cambio_por_neumatico_viejo_codigo
+	)
+	SELECT DISTINCT
+	p.parada_box_codigo,
+	(SELECT N.neumatico_numero_serie FROM  [NOCURSOMASLOSSABADOS].Neumatico N WHERE N.neumatico_numero_serie = M.NEUMATICO1_NRO_SERIE_VIEJO)
+	FROM gd_esquema.Maestra M
+	WHERE M.NEUMATICO1_NRO_SERIE_VIEJO IS NOT NULL AND M.NEUMATICO1_NRO_SERIE_NUEVO IS NOT NULL
+
 END 
 GO
