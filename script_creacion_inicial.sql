@@ -444,8 +444,10 @@ BEGIN
 	--select * from [NOCURSOMASLOSSABADOS].Neumatico
 
 
+
+
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Parada_Box(
-		parada_codigo int NOT NULL,
+		parada_codigo int identity(1,1) NOT NULL,
 		parada_auto_carrera int,
 		parada_numero_vuelta decimal(18,0),
 		parada_tiempo decimal(18,2),
@@ -454,21 +456,21 @@ BEGIN
 		CONSTRAINT FK_id_AUTO_CARRERA FOREIGN KEY(parada_auto_carrera) REFERENCES [NOCURSOMASLOSSABADOS].[Auto_Carrera](auto_carrera_codigo),
 	)
 
-	CREATE TABLE [NOCURSOMASLOSSABADOS].Cambio_Por_Neumatico(
-		cambio_neumatico_codigo int NOT NULL,
+	CREATE TABLE [NOCURSOMASLOSSABADOS].Cambio_Neumatico(
+		cambio_neumatico_codigo int identity(1,1) NOT NULL,
 		cambio_neumatico_parada int,
 		CONSTRAINT PK_CAMBIO_NEUMATICO PRIMARY KEY(cambio_neumatico_codigo),
 		CONSTRAINT FK_id_PARADA_BOX FOREIGN KEY(cambio_neumatico_parada) REFERENCES [NOCURSOMASLOSSABADOS].[Parada_Box](parada_codigo),
 	)
 
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Cambio_Por_Neumatico(
-		cambio_por_neumatico_codigo int NOT NULL,
+		cambio_por_neumatico_codigo int identity(1,1) NOT NULL,
 		cambio_neumatico_codigo int,
 		cambio_por_neumatico_nuevo_codigo nvarchar(255),
 		cambio_por_neumatico_viejo_codigo nvarchar(255),
 		CONSTRAINT PK_CAMBIO_POR_NEUMATICO PRIMARY KEY(cambio_por_neumatico_codigo),
-		CONSTRAINT FK_id_NEUMATICO_NUEVO FOREIGN KEY(cambio_neumatico_nuevo_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Neumatico](neumatico_numero_serie),
-		CONSTRAINT FK_id_NEUMATICO_VIEJO FOREIGN KEY(cambio_neumatico_viejo_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Neumatico](neumatico_numero_serie),
+		CONSTRAINT FK_id_NEUMATICO_NUEVO FOREIGN KEY(cambio_por_neumatico_nuevo_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Neumatico](neumatico_numero_serie),
+		CONSTRAINT FK_id_NEUMATICO_VIEJO FOREIGN KEY(cambio_por_neumatico_viejo_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Neumatico](neumatico_numero_serie),
 		CONSTRAINT FK_id_CAMBIO_NEUMATICO FOREIGN KEY(cambio_neumatico_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Cambio_neumatico](cambio_neumatico_codigo)
 	)
 END 
