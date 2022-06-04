@@ -19,7 +19,6 @@ BEGIN
 		pais_descripcion nvarchar(255),
 		CONSTRAINT PK_PAIS PRIMARY KEY(pais_codigo)
 	)
-	GO
 
 	
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Escuderia')
@@ -31,7 +30,6 @@ BEGIN
 		CONSTRAINT PK_ESCUDERIA PRIMARY KEY(escuderia_codigo),
 		CONSTRAINT FK_id_PAIS FOREIGN KEY(escuderia_pais) REFERENCES [NOCURSOMASLOSSABADOS].[Pais](pais_codigo)
 	)
-	GO
 
 	
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Auto_Modelo')
@@ -41,7 +39,6 @@ BEGIN
 	  auto_modelo_descripcion nvarchar(255),
 	  CONSTRAINT PK_AUTO_MODELO PRIMARY KEY(auto_modelo_codigo)
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Piloto')
@@ -55,7 +52,6 @@ BEGIN
 		CONSTRAINT PK_PILOTO PRIMARY KEY(piloto_codigo)
 		CONSTRAINT FK_PAIS_codigo FOREIGN KEY(piloto_pais) REFERENCES[NOCURSOMASLOSSABADOS].[Pais](pais_codigo)
 	)
-	GO
 	
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Auto')
@@ -71,7 +67,6 @@ BEGIN
 	  CONSTRAINT FK_id_AUTO_PILOTO FOREIGN KEY(auto_piloto) REFERENCES [NOCURSOMASLOSSABADOS].[Piloto] (piloto_codigo),
 	  CONSTRAINT FK_id_AUTO_MODELO FOREIGN KEY(auto_modelo) REFERENCES [NOCURSOMASLOSSABADOS].[Auto_Modelo] (auto_modelo_codigo)
 	)
-	GO
 	
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Circuito')
@@ -83,7 +78,6 @@ BEGIN
 		CONSTRAINT PK_CIRCUITO PRIMARY KEY(circuito_codigo),
 		CONSTRAINT FK_codigo_PAIS FOREIGN KEY(circuito_pais) REFERENCES [NOCURSOMASLOSSABADOS].[Pais](pais_codigo)
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Carrera')
@@ -98,7 +92,6 @@ BEGIN
 		CONSTRAINT PK_CARRERA PRIMARY KEY(carrera_codigo),
 		CONSTRAINT FK_id_CIRCUITO FOREIGN KEY(carrera_circuito) REFERENCES [NOCURSOMASLOSSABADOS].[Circuito](circuito_codigo)
 	)
-	GO
 
 	
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Auto_Carrera')
@@ -111,7 +104,6 @@ BEGIN
 		CONSTRAINT FK_id_AUTO FOREIGN KEY(auto_carrera_auto) REFERENCES [NOCURSOMASLOSSABADOS].[Auto](auto_codigo),
 		CONSTRAINT FK_id_CARRERA FOREIGN KEY(auto_carrera_carrera) REFERENCES [NOCURSOMASLOSSABADOS].[Carrera](carrera_codigo)
 	)
-	GO
 
 	 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Bandera')
@@ -121,7 +113,6 @@ BEGIN
 		bandera_color nvarchar(255),
 		CONSTRAINT PK_BANDERA PRIMARY KEY(bandera_codigo)
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Sector_Tipo')
@@ -131,7 +122,6 @@ BEGIN
 		sector_tipo_descripcion nvarchar(255),
 		CONSTRAINT PK_SECTOR_TIPO PRIMARY KEY(sector_tipo_codigo)
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Sector')
@@ -145,7 +135,6 @@ BEGIN
 		CONSTRAINT FK_id_SECTOR_CIRCUITO FOREIGN KEY(sector_circuito) REFERENCES [NOCURSOMASLOSSABADOS].[Circuito](circuito_codigo),
 		CONSTRAINT FK_id_TIPO_SECTOR FOREIGN KEY(sector_tipo) REFERENCES [NOCURSOMASLOSSABADOS].[Sector_Tipo](sector_tipo_codigo)
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Incidente_Tipo')
@@ -155,8 +144,6 @@ BEGIN
 		incidente_tipo_descripcion nvarchar(255),
 		CONSTRAINT PK_INCIDENTE_TIPO PRIMARY KEY(incidente_tipo_codigo)
 	)
-	GO
-	
 
 	
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Incidente')
@@ -172,7 +159,6 @@ BEGIN
 		CONSTRAINT FK_id_INCIDENTE_SECTOR FOREIGN KEY(incidente_sector) REFERENCES [NOCURSOMASLOSSABADOS].[Sector](sector_codigo),
 		CONSTRAINT FK_id_BANDERA FOREIGN KEY(incidente_bandera) REFERENCES [NOCURSOMASLOSSABADOS].[Bandera](bandera_codigo)
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Auto_Incidente')
@@ -188,7 +174,6 @@ BEGIN
 		CONSTRAINT FK_id_INCIDENTE FOREIGN KEY(auto_incidente_incidente_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Incidente](incidente_codigo),
 		CONSTRAINT FK_id_INCIDENTE_TIPO FOREIGN KEY(auto_incidente_tipo) REFERENCES [NOCURSOMASLOSSABADOS].[Incidente_Tipo](incidente_tipo_codigo)
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Medicion')
@@ -208,7 +193,6 @@ BEGIN
 	CONSTRAINT FK_id_medicion_AUTO_CARRERA FOREIGN KEY(medicion_auto_carrera) REFERENCES [NOCURSOMASLOSSABADOS].[Auto_Carrera](auto_carrera_codigo),
 	CONSTRAINT FK_id_medicion_SECTOR FOREIGN KEY(medicion_sector) REFERENCES [NOCURSOMASLOSSABADOS].[Sector](sector_codigo)
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Motor_Modelo')
@@ -218,7 +202,6 @@ BEGIN
 		motor_modelo_descripcion nvarchar(255),
 		CONSTRAINT PK_MOTOR PRIMARY KEY(motor_modelo_codigo),
 	)
-	GO
 
 
 
@@ -230,7 +213,6 @@ BEGIN
 		CONSTRAINT PK_MOTOR_nor_serie PRIMARY KEY(motor_numero_serie),
 		CONSTRAINT FK_id_MOTOR_MODELO FOREIGN KEY(motor_modelo) REFERENCES [NOCURSOMASLOSSABADOS].[Motor_Modelo](motor_modelo_codigo)
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Motor_Medicion')
@@ -247,7 +229,6 @@ BEGIN
 		CONSTRAINT FK_id_MEDICION FOREIGN KEY(motor_medicion_medicion) REFERENCES [NOCURSOMASLOSSABADOS].[Medicion](medicion_codigo),
 		CONSTRAINT FK_id_MOTOR FOREIGN KEY(motor_medicion_motor_numero_serie) REFERENCES [NOCURSOMASLOSSABADOS].[Motor](motor_numero_serie)
 	)
-	GO
 	
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Caja_De_Cambio_Modelo')
@@ -257,7 +238,6 @@ BEGIN
 		caja_modelo_descripcion nvarchar(50),
 		CONSTRAINT PK_CAJA_CAMBIO PRIMARY KEY(caja_modelo_codigo),
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Caja_de_cambio')
@@ -268,7 +248,6 @@ BEGIN
 		CONSTRAINT PK_CAJA_DE_CAMBIO PRIMARY KEY(caja_numero_serie),
 		CONSTRAINT FK_id_CAJA_DE_CAMBIO_MODELO FOREIGN KEY(caja_modelo) REFERENCES [NOCURSOMASLOSSABADOS].[Caja_De_Cambio_Modelo](caja_modelo_codigo)	
 	)
-	GO
 
 	
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Caja_De_Cambio_Medicion')
@@ -284,7 +263,6 @@ BEGIN
 		CONSTRAINT FK_id_CAJA_MEDICION FOREIGN KEY(caja_medicion_medicion) REFERENCES [NOCURSOMASLOSSABADOS].[Medicion](medicion_codigo),
 		CONSTRAINT FK_id_CAJA_DE_CAMBIO FOREIGN KEY(caja_medicion_caja_numero_serie) REFERENCES [NOCURSOMASLOSSABADOS].[Caja_De_Cambio](caja_numero_serie)
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Posicion')
@@ -294,7 +272,6 @@ BEGIN
 		posicion_posicion nvarchar(255),
 		CONSTRAINT PK_POSICION PRIMARY KEY(posicion_codigo)	
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Freno')
@@ -306,7 +283,6 @@ BEGIN
 		CONSTRAINT PK_FRENO PRIMARY KEY(freno_numero_serie),
 		CONSTRAINT FK_id_POSICION FOREIGN KEY(freno_posicion) REFERENCES [NOCURSOMASLOSSABADOS].[Posicion](posicion_codigo)	
 	)
-	GO
 
 	
 
@@ -322,7 +298,6 @@ BEGIN
 		CONSTRAINT FK_id_FRENO_MEDICION FOREIGN KEY(freno_medicion_medicion) REFERENCES [NOCURSOMASLOSSABADOS].[Medicion](medicion_codigo),
 		CONSTRAINT FK_id_FRENO FOREIGN KEY(freno_medicion_freno_numero_serie) REFERENCES [NOCURSOMASLOSSABADOS].[Freno](freno_numero_serie)
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Neumatico_Tipo')
@@ -332,7 +307,6 @@ BEGIN
 		neumatico_tipo_descripcion nvarchar(255),
 		CONSTRAINT PK_NEUMATICO_TIPO PRIMARY KEY(neumatico_tipo_codigo),
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Neumatico')
@@ -345,7 +319,6 @@ BEGIN
 		CONSTRAINT FK_id_NEUMATICO_TIPO FOREIGN KEY(neumatico_tipo) REFERENCES [NOCURSOMASLOSSABADOS].[Neumatico_Tipo](neumatico_tipo_codigo),
 		CONSTRAINT FK_id_NEUMATICO_POSICION FOREIGN KEY(neumatico_posicion) REFERENCES [NOCURSOMASLOSSABADOS].[Posicion](posicion_codigo)	
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Neumatico_Medicion')
@@ -361,7 +334,6 @@ BEGIN
 		CONSTRAINT FK_id_NEUMATICO_MEDICION FOREIGN KEY(neumatico_medicion_medicion) REFERENCES [NOCURSOMASLOSSABADOS].[Medicion](medicion_codigo),
 		CONSTRAINT FK_id_NEUMATICO FOREIGN KEY(neumatico_medicion_neumatico_numero_serie) REFERENCES [NOCURSOMASLOSSABADOS].[Neumatico](neumatico_numero_serie)
 	)
-	GO
 
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Parada_Box')
@@ -374,7 +346,6 @@ BEGIN
 		CONSTRAINT PK_PARADA_BOX PRIMARY KEY(parada_codigo),
 		CONSTRAINT FK_id_AUTO_CARRERA FOREIGN KEY(parada_auto_carrera) REFERENCES [NOCURSOMASLOSSABADOS].[Auto_Carrera](auto_carrera_codigo),
 	)
-	GO
 	
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Cambio_Por_Neumatico')
@@ -389,7 +360,6 @@ BEGIN
 		CONSTRAINT FK_id_NEUMATICO_NUEVO FOREIGN KEY(cambio_por_neumatico_nuevo_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Neumatico](neumatico_numero_serie),
 		CONSTRAINT FK_id_NEUMATICO_VIEJO FOREIGN KEY(cambio_por_neumatico_viejo_codigo) REFERENCES [NOCURSOMASLOSSABADOS].[Neumatico](neumatico_numero_serie)
 	)
-	GO
 
 END 
 GO
@@ -683,7 +653,7 @@ BEGIN
 END
 GO
 	
-select * from [NOCURSOMASLOSSABADOS].Medicion 
+--select * from [NOCURSOMASLOSSABADOS].Medicion 
 
 --el tele_auto_codigo 1 es del modelo 248 F1   auto_numero 1  . es el autocarrera 17. que es auto 12   carrera 1. auto modelo =2
 --el tele_auto_codigo 120830 es del modelo SA05   auto_numero 1  . el autocarrera 63. que es auto 7   carrera 4. auto modelo =8
@@ -913,99 +883,38 @@ GO
 	
 
 -- Carga de tabla Neumatico
---nose si tengo que seleccionar de NEUMATICO y TELE_NEUMATICO ??????? pensar
---SEGURO SE OPDIA HACER ALGUNA FUNCION PARA TODO ESTO
---cheqeuar que puede estar re mal
-
---select distinct NEUMATICO1_NRO_SERIE_viejo from gd_esquema.Maestra where NEUMATICO1_NRO_SERIE_viejo = 'XQQ633778'
---and NEUMATICO1_NRO_SERIE_NUEVO in(
---select TELE_NEUMATICO1_NRO_SERIE from gd_esquema.Maestra
---)
-
---708
---(select TELE_NEUMATICO1_NRO_SERIE from gd_esquema.Maestra) union
---(select TELE_NEUMATICO2_NRO_SERIE from gd_esquema.Maestra) union
---(select TELE_NEUMATICO3_NRO_SERIE from gd_esquema.Maestra) union
---(select TELE_NEUMATICO4_NRO_SERIE from gd_esquema.Maestra) union
---(select NEUMATICO1_NRO_SERIE_NUEVO from gd_esquema.Maestra) union
---(select NEUMATICO1_NRO_SERIE_VIEJO from gd_esquema.Maestra) union
---(select NEUMATICO2_NRO_SERIE_NUEVO from gd_esquema.Maestra) union
---(select NEUMATICO2_NRO_SERIE_VIEJO from gd_esquema.Maestra) union
---(select NEUMATICO3_NRO_SERIE_NUEVO from gd_esquema.Maestra) union
---(select NEUMATICO3_NRO_SERIE_VIEJO from gd_esquema.Maestra) union
---(select NEUMATICO4_NRO_SERIE_NUEVO from gd_esquema.Maestra) union
---(select NEUMATICO4_NRO_SERIE_VIEJO from gd_esquema.Maestra)
---order by 1
-
---(select m0.NEUMATICO1_NRO_SERIE_NUEVO
---	from gd_esquema.Maestra m0
---	where m0.NEUMATICO1_NRO_SERIE_NUEVO is not null
---	) 
---union
---	(select m1.NEUMATICO1_NRO_SERIE_VIEJO
---	from gd_esquema.Maestra m1
---	where m1.NEUMATICO1_NRO_SERIE_VIEJO is not null
---	) 
-
 CREATE PROCEDURE cargar_tabla_neumatico
 AS
 BEGIN
-	INSERT INTO [NOCURSOMASLOSSABADOS].Neumatico (neumatico_numero_serie, neumatico_tipo, neumatico_posicion) --380 filas
-		(select m0.NEUMATICO1_NRO_SERIE_NUEVO, t0.neumatico_tipo_codigo, p0.posicion_codigo 
-		from gd_esquema.Maestra m0
-		JOIN [NOCURSOMASLOSSABADOS].[Posicion] p0 ON p0.posicion_posicion = m0.NEUMATICO1_POSICION_NUEVO
-		JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t0 ON t0.neumatico_tipo_descripcion = m0.NEUMATICO1_TIPO_NUEVO
-		where m0.NEUMATICO1_NRO_SERIE_NUEVO is not null
-		) 
+	INSERT INTO [NOCURSOMASLOSSABADOS].Neumatico (neumatico_numero_serie, neumatico_tipo, neumatico_posicion) 
+
+		(select TELE_NEUMATICO1_NRO_SERIE, t.neumatico_tipo_codigo, p.posicion_codigo
+		from gd_esquema.Maestra m
+		JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t ON t.neumatico_tipo_descripcion = m.NEUMATICO1_TIPO_VIEJO
+		JOIN [NOCURSOMASLOSSABADOS].[Posicion] p ON p.posicion_posicion = m.TELE_NEUMATICO1_POSICION
+		where m.TELE_NEUMATICO1_NRO_SERIE is not null
+		)
 	union
-		(select m1.NEUMATICO1_NRO_SERIE_VIEJO, t1.neumatico_tipo_codigo, p1.posicion_codigo
-		from gd_esquema.Maestra m1
-		JOIN [NOCURSOMASLOSSABADOS].[Posicion] p1 ON p1.posicion_posicion = m1.NEUMATICO1_POSICION_VIEJO
-		JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t1 ON t1.neumatico_tipo_descripcion = m1.NEUMATICO1_TIPO_VIEJO
-		where m1.NEUMATICO1_NRO_SERIE_VIEJO is not null
-		) 
+		(select TELE_NEUMATICO2_NRO_SERIE, t.neumatico_tipo_codigo, p.posicion_codigo
+			from gd_esquema.Maestra m
+			JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t ON t.neumatico_tipo_descripcion = m.NEUMATICO2_TIPO_VIEJO
+			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p ON p.posicion_posicion = m.TELE_NEUMATICO2_POSICION
+			where m.TELE_NEUMATICO2_NRO_SERIE is not null
+		)
 	union
-		(select m2.NEUMATICO2_NRO_SERIE_NUEVO, t2.neumatico_tipo_codigo, p2.posicion_codigo
-		from gd_esquema.Maestra m2
-		JOIN [NOCURSOMASLOSSABADOS].[Posicion] p2 ON p2.posicion_posicion = m2.NEUMATICO2_POSICION_NUEVO
-		JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t2 ON t2.neumatico_tipo_descripcion = m2.NEUMATICO2_TIPO_NUEVO
-		where m2.NEUMATICO2_NRO_SERIE_NUEVO is not null
-		) 
+		(select TELE_NEUMATICO3_NRO_SERIE, t.neumatico_tipo_codigo, p.posicion_codigo
+			from gd_esquema.Maestra m
+			JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t ON t.neumatico_tipo_descripcion = m.NEUMATICO3_TIPO_VIEJO
+			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p ON p.posicion_posicion = m.TELE_NEUMATICO3_POSICION
+			where m.TELE_NEUMATICO3_NRO_SERIE is not null
+		)
 	union
-		(select m3.NEUMATICO2_NRO_SERIE_VIEJO, t3.neumatico_tipo_codigo, p3.posicion_codigo
-		from gd_esquema.Maestra m3
-		JOIN [NOCURSOMASLOSSABADOS].[Posicion] p3 ON p3.posicion_posicion = m3.NEUMATICO2_POSICION_VIEJO
-		JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t3 ON t3.neumatico_tipo_descripcion = m3.NEUMATICO2_TIPO_VIEJO
-		where m3.NEUMATICO2_NRO_SERIE_VIEJO is not null
-		) 
-	union
-		(select m4.NEUMATICO3_NRO_SERIE_NUEVO, t4.neumatico_tipo_codigo, p4.posicion_codigo
-		from gd_esquema.Maestra m4
-		JOIN [NOCURSOMASLOSSABADOS].[Posicion] p4 ON p4.posicion_posicion = m4.NEUMATICO3_POSICION_NUEVO
-		JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t4 ON t4.neumatico_tipo_descripcion = m4.NEUMATICO3_TIPO_NUEVO
-		where m4.NEUMATICO3_NRO_SERIE_NUEVO is not null
-		) 
-	union
-		(select m5.NEUMATICO3_NRO_SERIE_VIEJO, t5.neumatico_tipo_codigo, p5.posicion_codigo
-		from gd_esquema.Maestra m5
-		JOIN [NOCURSOMASLOSSABADOS].[Posicion] p5 ON p5.posicion_posicion = m5.NEUMATICO3_POSICION_VIEJO
-		JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t5 ON t5.neumatico_tipo_descripcion = m5.NEUMATICO3_TIPO_VIEJO
-		where m5.NEUMATICO3_NRO_SERIE_VIEJO is not null
-		) 
-	union
-		(select m6.NEUMATICO4_NRO_SERIE_NUEVO, t6.neumatico_tipo_codigo, p6.posicion_codigo
-		from gd_esquema.Maestra m6
-		JOIN [NOCURSOMASLOSSABADOS].[Posicion] p6 ON p6.posicion_posicion = m6.NEUMATICO4_POSICION_NUEVO
-		JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t6 ON t6.neumatico_tipo_descripcion = m6.NEUMATICO4_TIPO_NUEVO
-		where m6.NEUMATICO4_NRO_SERIE_NUEVO is not null
-		) 
-	union
-		(select m7.NEUMATICO4_NRO_SERIE_VIEJO, t7.neumatico_tipo_codigo, p7.posicion_codigo
-		from gd_esquema.Maestra m7
-		JOIN [NOCURSOMASLOSSABADOS].[Posicion] p7 ON p7.posicion_posicion = m7.NEUMATICO4_POSICION_VIEJO
-		JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t7 ON t7.neumatico_tipo_descripcion = m7.NEUMATICO4_TIPO_VIEJO
-		where m7.NEUMATICO4_NRO_SERIE_VIEJO is not null
-		) 			
+		(select TELE_NEUMATICO4_NRO_SERIE, t.neumatico_tipo_codigo, p.posicion_codigo
+			from gd_esquema.Maestra m
+			JOIN [NOCURSOMASLOSSABADOS].[Neumatico_Tipo] t ON t.neumatico_tipo_descripcion = m.NEUMATICO4_TIPO_VIEJO
+			JOIN [NOCURSOMASLOSSABADOS].[Posicion] p ON p.posicion_posicion = m.TELE_NEUMATICO4_POSICION
+			where m.TELE_NEUMATICO4_NRO_SERIE is not null
+		)			
 END
 GO
 
