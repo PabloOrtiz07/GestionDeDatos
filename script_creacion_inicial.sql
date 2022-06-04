@@ -7,6 +7,7 @@ BEGIN
 END
 GO
 
+
 ----------CREACION DE TABLAS-------------------
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.crear_tablas AS
 BEGIN
@@ -676,7 +677,6 @@ GO
 
 
 -- Carga de tabla Motor
---NO SE CARGA EN ORDEN NOSE PORQUE
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_motor
 AS
 BEGIN
@@ -690,8 +690,6 @@ BEGIN
 	ORDER BY mm.motor_modelo_codigo
 END
 GO
-
---select * from NOCURSOMASLOSSABADOS.Motor 
 
 
 -- Carga de tabla motor_medicion
@@ -729,7 +727,6 @@ GO
 
 
 -- Carga de tabla Caja_De_Cambio
---NO SE CARGA EN ORDEN NOSE PORQUE
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_caja_de_cambio
 AS
 BEGIN
@@ -792,7 +789,6 @@ GO
 
 
 -- Carga de tabla Freno
---no se carga ordenado
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_freno
 AS
 BEGIN
@@ -819,10 +815,8 @@ BEGIN
 		from gd_esquema.Maestra m4
 		JOIN [NOCURSOMASLOSSABADOS].[Posicion] p3 ON p3.posicion_posicion = m4.TELE_FRENO4_POSICION
 		where TELE_FRENO4_NRO_SERIE is not null)
-	order by 2
 END
 GO
-	
 
 
 -- Carga de tabla Freno_medicion
