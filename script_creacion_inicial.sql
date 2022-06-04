@@ -606,18 +606,18 @@ GO
 
 
 -- Carga de tabla Incidente
---OJO QUE EN EL CODIGO_SECTOR 36 HAY DOS INCIDENTES TIEMPO IGUALES. VER SI EST'A BIEN O NO QUE ESTA TABLA SOLO SE CARGUE UNA VEZ CON ESE DATO O QUE
 CREATE PROCEDURE cargar_tabla_incidente
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Incidente (incidente_sector, incidente_carrera, incidente_tiempo, incidente_bandera)
-	SELECT distinct
+	SELECT
 		CODIGO_SECTOR,
 		CODIGO_CARRERA,
 		INCIDENTE_TIEMPO,
 		b.bandera_codigo
 	FROM gd_esquema.Maestra m
 	JOIN [NOCURSOMASLOSSABADOS].[Bandera] b ON b.bandera_color = m.INCIDENTE_BANDERA
+	group by CODIGO_SECTOR, CODIGO_CARRERA,	INCIDENTE_TIEMPO, b.bandera_codigo, m.INCIDENTE_TIPO
 END
 GO
 
@@ -1079,6 +1079,10 @@ BEGIN
 END  
 GO
 
+--select * from gd_esquema.Maestra where PARADA_BOX_TIEMPO is not null AND AUTO_MODELO = 'SA05' AND CODIGO_CARRERA = 1 AND PARADA_BOX_TIEMPO IS NOT NULL
+--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_codigo = 13 --auto 7  carrera 1
+--select * from NOCURSOMASLOSSABADOS.Auto --mod 8   num 1
+--select * from NOCURSOMASLOSSABADOS.Auto_Modelo --SA05
 --select * from [NOCURSOMASLOSSABADOS].Parada_Box
 
 --ac 13
@@ -1093,30 +1097,23 @@ GO
 CREATE PROCEDURE cargar_tabla_cambio_por_neumatico
 AS
 BEGIN
-INSERT INTO [NOCURSOMASLOSSABADOS].Cambio_Por_Neumatico
-	(cambio_parada_box_codigo, cambio_por_neumatico_nuevo_codigo, cambio_por_neumatico_viejo_codigo)
-SELECT DISTINCT
-	p.parada_box_codigo,
-(SELECT N.neumatico_numero_serie FROM  [NOCURSOMASLOSSABADOS].Neumatico N WHERE N.neumatico_numero_serie = M.NEUMATICO1_NRO_SERIE_VIEJO)
-FROM gd_esquema.Maestra M
-WHERE M.NEUMATICO1_NRO_SERIE_VIEJO IS NOT NULL AND M.NEUMATICO1_NRO_SERIE_NUEVO IS NOT NULL
-	
-
---create procedure cargar_tabla_cambio_por_neumatico
---AS
---BEGIN
---INSERT INTO [NOCURSOMASLOSSABADOS].Cambio_Por_Neumatico(
---	cambio_parada_box_codigo,
---	cambio_por_neumatico_nuevo_codigo,
---	cambio_por_neumatico_viejo_codigo
---)
---SELECT DISTINCT
---	p.parada_box_codigo,
---(SELECT N.neumatico_numero_serie FROM  [NOCURSOMASLOSSABADOS].Neumatico N WHERE N.neumatico_numero_serie = M.NEUMATICO1_NRO_SERIE_VIEJO)
---FROM gd_esquema.Maestra M
---WHERE M.NEUMATICO1_NRO_SERIE_VIEJO IS NOT NULL AND M.NEUMATICO1_NRO_SERIE_NUEVO IS NOT NULL
-
-END 
+	INSERT INTO [NOCURSOMASLOSSABADOS].Cambio_Por_Neumatico
+		(cambio_parada_box_codigo, cambio_por_neumatico_nuevo_codigo, cambio_por_neumatico_viejo_codigo)
+	SELECT DISTINCT
+		pb.parada_codigo,
+		n1.neumatico_numero_serie,
+		n2.neumatico_numero_serie
+	FROM gd_esquema.Maestra M
+	JOIN [NOCURSOMASLOSSABADOS].[Auto_Modelo] am ON am.auto_modelo_descripcion = m.AUTO_MODELO
+	JOIN [NOCURSOMASLOSSABADOS].[Auto] a ON a.auto_modelo = am.auto_modelo_codigo AND a.auto_numero = m.AUTO_NUMERO
+	JOIN [NOCURSOMASLOSSABADOS].[Auto_Carrera] ac ON ac.auto_carrera_auto = a.auto_codigo AND ac.auto_carrera_carrera = m.CODIGO_CARRERA
+	JOIN [NOCURSOMASLOSSABADOS].[Parada_Box] pb ON pb.parada_auto_carrera = ac.auto_carrera_codigo 
+												AND pb.parada_numero_vuelta = m.PARADA_BOX_VUELTA
+												AND pb.parada_tiempo = m.PARADA_BOX_TIEMPO
+	JOIN [NOCURSOMASLOSSABADOS].[Neumatico] n1 ON n1.neumatico_numero_serie = m.NEUMATICO1_NRO_SERIE_NUEVO
+	JOIN [NOCURSOMASLOSSABADOS].[Neumatico] n2 ON n2.neumatico_numero_serie = m.NEUMATICO1_NRO_SERIE_VIEJO
+	WHERE m.PARADA_BOX_TIEMPO IS NOT NULL
+END	
 GO
 
 
