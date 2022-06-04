@@ -1,15 +1,12 @@
 USE [GD1C2022]
 GO
 
-CREATE PROCEDURE crear_esquema AS
-BEGIN
-	IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name='NOCURSOMASLOSSABADOS')
-		EXEC ('CREATE SCHEMA NOCURSOMASLOSSABADOS')
-END
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name='NOCURSOMASLOSSABADOS')
+	EXEC ('CREATE SCHEMA NOCURSOMASLOSSABADOS')
 GO
 
 ----------CREACION DE TABLAS-------------------
-CREATE PROCEDURE crear_tablas AS
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.crear_tablas AS
 BEGIN
 
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Pais')
@@ -380,7 +377,7 @@ GO
 ----------CRECACIÓN DE PROCEDURES PARA MIGRACIÓN DE TABLAS-------------------
 	
 -- Carga de tabla pais
-CREATE PROCEDURE cargar_tabla_pais
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_pais
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Pais (pais_descripcion)
@@ -397,7 +394,7 @@ GO
 
 
 -- Carga de tabla escuderia
-CREATE PROCEDURE cargar_tabla_escuderia
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_escuderia
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Escuderia (escuderia_nombre, escuderia_pais)
@@ -411,7 +408,7 @@ GO
 	
 
 -- Carga de tabla Auto_modelo
-CREATE PROCEDURE cargar_tabla_auto_modelo
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_auto_modelo
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Auto_Modelo (auto_modelo_descripcion)
@@ -424,7 +421,7 @@ GO
 
 
 -- Carga de tabla Piloto
-CREATE PROCEDURE cargar_tabla_piloto
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_piloto
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Piloto (piloto_nombre, piloto_apellido, piloto_pais, piloto_fecha_nacimiento)
@@ -440,7 +437,7 @@ GO
 
 
 -- Carga de tabla Auto
-CREATE PROCEDURE cargar_tabla_auto
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_auto
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Auto (auto_escuderia, auto_piloto, auto_modelo, auto_numero)
@@ -459,7 +456,7 @@ GO
 
 
 -- Carga de tabla Circuito
-CREATE PROCEDURE cargar_tabla_circuito
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_circuito
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Circuito (circuito_codigo, circuito_nombre, circuito_pais)
@@ -474,7 +471,7 @@ GO
 
 	
 -- Carga de tabla Carrera
-CREATE PROCEDURE cargar_tabla_carrera
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_carrera
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Carrera 
@@ -494,7 +491,7 @@ GO
 	
 -- Carga de tabla Auto_Carrera
 --VER SI ESTÁ BIEN CARGADA ESTA TABLA
-CREATE PROCEDURE cargar_tabla_auto_carrera
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_auto_carrera
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Auto_Carrera (auto_carrera_auto, auto_carrera_carrera)
@@ -520,7 +517,7 @@ GO
 	 
 	
 -- Carga de tabla Bandera
-CREATE PROCEDURE cargar_tabla_bandera
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_bandera
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Bandera (bandera_color)
@@ -534,7 +531,7 @@ GO
 
 
 -- Carga de tabla Sector_tipo
-CREATE PROCEDURE cargar_tabla_sector_tipo
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_sector_tipo
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Sector_Tipo (sector_tipo_descripcion)
@@ -546,7 +543,7 @@ GO
 	
 		
 -- Carga de tabla Sector
-CREATE PROCEDURE cargar_tabla_sector
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_sector
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Sector (sector_codigo, sector_circuito, sector_distancia, sector_tipo)
@@ -560,10 +557,10 @@ BEGIN
 	ORDER BY CODIGO_SECTOR
 END
 GO
-	
+
 
 -- Carga de tabla Incidente_tipo
-CREATE PROCEDURE cargar_tabla_incidente_tipo
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_incidente_tipo
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Incidente_Tipo (incidente_tipo_descripcion)
@@ -576,7 +573,7 @@ GO
 
 
 -- Carga de tabla Incidente
-CREATE PROCEDURE cargar_tabla_incidente
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_incidente
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Incidente (incidente_sector, incidente_carrera, incidente_tiempo, incidente_bandera)
@@ -594,7 +591,7 @@ GO
 
 -- Carga de tabla Auto_incidente
 --CHEQUEAR ESTE. tiene que devolver 60 filas creo. chequear pq puede estar mal tranquilamente
-CREATE PROCEDURE cargar_tabla_auto_incidente
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_auto_incidente
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Auto_Incidente 
@@ -628,7 +625,7 @@ GO
 -- Carga de tabla Medicion
 ---creo que tiene que dar 218641 filas
 --CHEQUEAR que es importamte y dificil.
-CREATE PROCEDURE cargar_tabla_medicion
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_medicion
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Medicion 
@@ -664,7 +661,7 @@ GO
 
 
 -- Carga de tabla Motor_Modelo
-CREATE PROCEDURE cargar_tabla_motor_modelo
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_motor_modelo
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Motor_Modelo (motor_modelo_descripcion)
@@ -678,7 +675,7 @@ GO
 
 -- Carga de tabla Motor
 --NO SE CARGA EN ORDEN NOSE PORQUE
-CREATE PROCEDURE cargar_tabla_motor
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_motor
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Motor (motor_numero_serie, motor_modelo)
@@ -697,7 +694,7 @@ GO
 
 -- Carga de tabla motor_medicion
 --chequear. devuelve el mismo numero que la tabla Medicion. estará bien eso?
-CREATE PROCEDURE cargar_tabla_motor_medicion
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_motor_medicion
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Motor_Medicion 
@@ -717,7 +714,7 @@ GO
 	
 
 -- Carga de tabla Caja_De_Cambio_Modelo
-CREATE PROCEDURE cargar_tabla_caja_de_cambio_modelo
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_caja_de_cambio_modelo
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Modelo (caja_modelo_descripcion)
@@ -731,7 +728,7 @@ GO
 
 -- Carga de tabla Caja_De_Cambio
 --NO SE CARGA EN ORDEN NOSE PORQUE
-CREATE PROCEDURE cargar_tabla_caja_de_cambio
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_caja_de_cambio
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Caja_De_Cambio (caja_numero_serie, caja_modelo)
@@ -748,7 +745,7 @@ GO
 
 -- Carga de tabla Caja_De_Cambio_medicion
 --igual que el motor_medicion
-CREATE PROCEDURE cargar_tabla_caja_de_cambio_medicion
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_caja_de_cambio_medicion
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Medicion 
@@ -768,7 +765,7 @@ GO
 -- Carga de tabla Posicion
 --SUPONGO QUE NO TIENE QUE HABER NULL NO?
 --ver si hay manera mejor de hacerlo
-CREATE PROCEDURE cargar_tabla_posicion
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_posicion
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Posicion (posicion_posicion)
@@ -794,7 +791,7 @@ GO
 
 -- Carga de tabla Freno
 --no se carga ordenado
-CREATE PROCEDURE cargar_tabla_freno
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_freno
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Freno (freno_numero_serie, freno_posicion, freno_tamanio_disco)
@@ -828,7 +825,7 @@ GO
 
 -- Carga de tabla Freno_medicion
 --CHEQUEAR, PERO PARECE QUE ANDA BIEN.
-CREATE PROCEDURE cargar_tabla_freno_medicion
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_freno_medicion
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Freno_medicion 
@@ -866,7 +863,7 @@ GO
 
 	
 -- Carga de tabla Neumatico_Tipo
-CREATE PROCEDURE cargar_tabla_neumatico_tipo
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_neumatico_tipo
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Neumatico_Tipo (neumatico_tipo_descripcion)
@@ -883,7 +880,7 @@ GO
 	
 
 -- Carga de tabla Neumatico
-CREATE PROCEDURE cargar_tabla_neumatico
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_neumatico
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Neumatico (neumatico_numero_serie, neumatico_tipo, neumatico_posicion) 
@@ -931,7 +928,7 @@ GO
 --SEGURO SE OPDIA HACER ALGUNA FUNCION PARA TODO ESTO
 --chequear. ni me fije si esta bien.
 --NO FUNCIONA. 
-CREATE PROCEDURE cargar_tabla_neumatico_medicion
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_neumatico_medicion
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Neumatico_Medicion 
@@ -971,7 +968,7 @@ GO
 
 	
 -- Carga de tabla Parada_Box
-CREATE PROCEDURE cargar_tabla_parada_box
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_parada_box
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Parada_Box (parada_auto_carrera, parada_numero_vuelta, parada_tiempo)
@@ -1003,7 +1000,7 @@ GO
 
 
 -- Carga de tabla Cambio_Por_Neumatico
-CREATE PROCEDURE cargar_tabla_cambio_por_neumatico
+CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_cambio_por_neumatico
 AS
 BEGIN
 	INSERT INTO [NOCURSOMASLOSSABADOS].Cambio_Por_Neumatico
@@ -1026,42 +1023,36 @@ END
 GO
 
 
-
-----------EJECUCIÓN DE PROCEDURE PARA CREAR ESQUEMA-------------------
-EXEC crear_esquema
-
 ----------EJECUCIÓN DE PROCEDURE PARA CREAR TABLAS-------------------
-EXEC crear_tablas
+EXEC NOCURSOMASLOSSABADOS.crear_tablas
 
 ----------EJECUCIÓN DE PROCEDURES PARA MIGRACIÓN DE TABLAS-------------------
-EXEC cargar_tabla_pais
-EXEC cargar_tabla_escuderia
-EXEC cargar_tabla_auto_modelo
-EXEC cargar_tabla_piloto
-EXEC cargar_tabla_auto
-EXEC cargar_tabla_circuito
-EXEC cargar_tabla_carrera
-EXEC cargar_tabla_auto_carrera
-EXEC cargar_tabla_bandera
-EXEC cargar_tabla_sector_tipo
-EXEC cargar_tabla_sector
-EXEC cargar_tabla_incidente_tipo
-EXEC cargar_tabla_incidente
-EXEC cargar_tabla_auto_incidente
-EXEC cargar_tabla_medicion
-EXEC cargar_tabla_motor_modelo
-EXEC cargar_tabla_motor
-EXEC cargar_tabla_motor_medicion
-EXEC cargar_tabla_caja_de_cambio_modelo
-EXEC cargar_tabla_caja_de_cambio
-EXEC cargar_tabla_caja_de_cambio_medicion
-EXEC cargar_tabla_posicion
-EXEC cargar_tabla_freno
-EXEC cargar_tabla_freno_medicion
-EXEC cargar_tabla_neumatico_tipo
-EXEC cargar_tabla_neumatico
-EXEC cargar_tabla_neumatico_medicion
-EXEC cargar_tabla_parada_box
-EXEC cargar_tabla_cambio_por_neumatico
-
-
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_pais
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_escuderia
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_auto_modelo
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_piloto
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_auto
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_circuito
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_carrera
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_auto_carrera
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_bandera
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_sector_tipo
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_sector
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_incidente_tipo
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_incidente
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_auto_incidente
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_medicion
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_motor_modelo
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_motor
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_motor_medicion
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_caja_de_cambio_modelo
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_caja_de_cambio
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_caja_de_cambio_medicion
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_posicion
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_freno
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_freno_medicion
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_neumatico_tipo
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_neumatico
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_neumatico_medicion
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_parada_box
+EXEC NOCURSOMASLOSSABADOS.cargar_tabla_cambio_por_neumatico
