@@ -285,7 +285,6 @@ BEGIN
 	)
 
 	
-
 	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Freno_medicion')
 		DROP TABLE [NOCURSOMASLOSSABADOS].Freno_medicion;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Freno_medicion(
@@ -366,17 +365,6 @@ GO
 
 
 
-	--SELECT AC.auto_carrera_codigo, AM.auto_modelo_descripcion, CIR.circuito_nombre, ESCU.escuderia_nombre  
-	--FROM NOCURSOMASLOSSABADOS.Auto_Carrera as AC 
-	--INNER JOIN NOCURSOMASLOSSABADOS.Auto as A ON AC.auto_carrera_auto = A.auto_codigo 
-	--INNER JOIN NOCURSOMASLOSSABADOS.Auto_Modelo as AM ON A.auto_codigo = AM.auto_modelo_codigo 
-	--INNER JOIN NOCURSOMASLOSSABADOS.Carrera as C ON C.carrera_codigo = AC.auto_carrera_carrera 
-	--INNER JOIN NOCURSOMASLOSSABADOS.Circuito as CIR ON CIR.circuito_codigo = C.carrera_codigo 
-	--INNER JOIN NOCURSOMASLOSSABADOS.Escuderia as ESCU ON ESCU.escuderia_codigo = A.auto_codigo
-
----------------------------------------------------------------------------------------------------------------------------------------------
-
-
 ----------CRECACIÓN DE PROCEDURES PARA MIGRACIÓN DE TABLAS-------------------
 	
 -- Carga de tabla pais
@@ -422,7 +410,6 @@ END
 GO
 	
 
-
 -- Carga de tabla Piloto
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_piloto
 AS
@@ -457,7 +444,6 @@ END
 GO
 	
 
-
 -- Carga de tabla Circuito
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_circuito
 AS
@@ -491,9 +477,7 @@ END
 GO
 
 	
-	
 -- Carga de tabla Auto_Carrera
---VER SI ESTÁ BIEN CARGADA ESTA TABLA
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_auto_carrera
 AS
 BEGIN
@@ -508,16 +492,6 @@ BEGIN
 END
 GO
 
-		
---select * from [NOCURSOMASLOSSABADOS].auto_carrera 
---select * from [NOCURSOMASLOSSABADOS].Auto_Modelo
---select * from [NOCURSOMASLOSSABADOS].Carrera
-	
---am 6 (FW28) -   carr 1  -  tiene al auto_numero 1 y 2    -- son los auto codigo 10 y 8
-
---select distinct AUTO_MODELO, AUTO_NUMERO, CODIGO_CARRERA FROM gd_esquema.Maestra m where CODIGO_CARRERA = 1 order by AUTO_MODELO
-	
-	 
 	
 -- Carga de tabla Bandera
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_bandera
@@ -530,7 +504,6 @@ BEGIN
 	WHERE INCIDENTE_BANDERA IS NOT NULL
 END
 GO
-
 
 
 -- Carga de tabla Sector_tipo
@@ -593,7 +566,6 @@ GO
 
 
 -- Carga de tabla Auto_incidente
---CHEQUEAR ESTE. tiene que devolver 60 filas creo. chequear pq puede estar mal tranquilamente
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_auto_incidente
 AS
 BEGIN
@@ -616,18 +588,8 @@ BEGIN
 END
 GO
 
---SELECT * FROM gd_esquema.Maestra WHERE INCIDENTE_TIEMPO IS NOT NULL AND AUTO_MODELO = 'RA106'
---select * from [NOCURSOMASLOSSABADOS].[Incidente]
---select * from [NOCURSOMASLOSSABADOS].[Incidente_Tipo]
---select * from [NOCURSOMASLOSSABADOS].[Auto_Modelo] --'RA106' es auto_modelo_codigo 3
---select * from [NOCURSOMASLOSSABADOS].[Auto] --q lo tienen auto 11 O 18
-
-
-
 
 -- Carga de tabla Medicion
----creo que tiene que dar 218641 filas
---CHEQUEAR que es importamte y dificil.
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_medicion
 AS
 BEGIN
@@ -653,15 +615,6 @@ BEGIN
 END
 GO
 	
---select * from [NOCURSOMASLOSSABADOS].Medicion 
-
---el tele_auto_codigo 1 es del modelo 248 F1   auto_numero 1  . es el autocarrera 17. que es auto 12   carrera 1. auto modelo =2
---el tele_auto_codigo 120830 es del modelo SA05   auto_numero 1  . el autocarrera 63. que es auto 7   carrera 4. auto modelo =8
---select * from [NOCURSOMASLOSSABADOS].Auto_Carrera
---select * from [NOCURSOMASLOSSABADOS].Auto
---select * from [NOCURSOMASLOSSABADOS].Auto_Modelo
-
-
 
 -- Carga de tabla Motor_Modelo
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_motor_modelo
@@ -693,7 +646,6 @@ GO
 
 
 -- Carga de tabla motor_medicion
---chequear. devuelve el mismo numero que la tabla Medicion. estará bien eso?
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_motor_medicion
 AS
 BEGIN
@@ -743,7 +695,6 @@ GO
 
 
 -- Carga de tabla Caja_De_Cambio_medicion
---igual que el motor_medicion
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_caja_de_cambio_medicion
 AS
 BEGIN
@@ -762,8 +713,6 @@ GO
 
 
 -- Carga de tabla Posicion
---SUPONGO QUE NO TIENE QUE HABER NULL NO?
---ver si hay manera mejor de hacerlo
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_posicion
 AS
 BEGIN
@@ -820,7 +769,6 @@ GO
 
 
 -- Carga de tabla Freno_medicion
---CHEQUEAR, PERO PARECE QUE ANDA BIEN.
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_freno_medicion
 AS
 BEGIN
@@ -851,11 +799,6 @@ BEGIN
 		where TELE_FRENO4_NRO_SERIE is not null)
 END
 GO
-
---select * from [NOCURSOMASLOSSABADOS].Freno_medicion where freno_medicion_medicion = 81837
---select * from gd_esquema.Maestra where TELE_AUTO_CODIGO = 81837
---select * from [NOCURSOMASLOSSABADOS].Freno where freno_numero_serie = 'UQX921036' --trans izq
-
 
 	
 -- Carga de tabla Neumatico_Tipo
@@ -911,19 +854,8 @@ BEGIN
 END
 GO
 
---select * from [NOCURSOMASLOSSABADOS].Neumatico_Tipo
---select * from [NOCURSOMASLOSSABADOS].Posicion
---ABC229817  tipo 2 DURO    posic 4  del der
---select * from gd_esquema.Maestra where TELE_NEUMATICO1_NRO_SERIE = 'ABC229817'
---select * from gd_esquema.Maestra where NEUMATICO1_NRO_SERIE_VIEJO = 'ABC229817'
---select * from gd_esquema.Maestra where NEUMATICO1_NRO_SERIE_NUEVO = 'ABC229817'
-
-
 
 -- Carga de tabla Neumatico_Medicion
---SEGURO SE OPDIA HACER ALGUNA FUNCION PARA TODO ESTO
---chequear. ni me fije si esta bien.
---NO FUNCIONA. 
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_neumatico_medicion
 AS
 BEGIN
@@ -957,11 +889,6 @@ BEGIN
 END
 GO
 
---exec cargar_tabla_neumatico_medicion --no anda
---select * from [NOCURSOMASLOSSABADOS].Neumatico_Medicion 
-
---select * from [NOCURSOMASLOSSABADOS].Neumatico
-
 	
 -- Carga de tabla Parada_Box
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_parada_box
@@ -980,19 +907,6 @@ BEGIN
 	order by ac.auto_carrera_codigo
 END  
 GO
-
---select * from gd_esquema.Maestra where PARADA_BOX_TIEMPO is not null AND AUTO_MODELO = 'SA05' AND CODIGO_CARRERA = 1 AND PARADA_BOX_TIEMPO IS NOT NULL
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_codigo = 13 --auto 7  carrera 1
---select * from NOCURSOMASLOSSABADOS.Auto --mod 8   num 1
---select * from NOCURSOMASLOSSABADOS.Auto_Modelo --SA05
---select * from [NOCURSOMASLOSSABADOS].Parada_Box
-
---ac 13
---select * from [NOCURSOMASLOSSABADOS].[Auto_Carrera] --ac 13    auto 7    carrera 1
---select * from gd_esquema.Maestra m where CODIGO_CARRERA = 1 and AUTO_MODELO = 'SA05' AND AUTO_NUMERO = 1 AND PARADA_BOX_VUELTA IS NOT NULL
---select * from [NOCURSOMASLOSSABADOS].[Auto] --modelo 8  numero 1
---select * from [NOCURSOMASLOSSABADOS].Auto_Modelo --modelo 8 = SA05
-
 
 
 -- Carga de tabla Cambio_Por_Neumatico
