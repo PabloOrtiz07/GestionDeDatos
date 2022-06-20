@@ -926,9 +926,23 @@ BEGIN
 		cambio_por_neumatico_viejo_codigo
 	)
 	SELECT DISTINCT
-	p.parada_box_codigo,
-	(SELECT N.neumatico_numero_serie FROM  [NOCURSOMASLOSSABADOS].Neumatico N WHERE N.neumatico_numero_serie = M.NEUMATICO1_NRO_SERIE_VIEJO)
-	FROM gd_esquema.Maestra M
+
+	(SELECT	
+		 N.neumatico_numero_serie 
+	FROM  gd_esquema.Maestra M
+		JOIN [NOCURSOMASLOSSABADOS].[Neumatico] N
+	ON N.neumatico_numero_serie = M.NEUMATICO1_NRO_SERIE_VIEJO
+	WHERE M.NEUMATICO1_NRO_SERIE_VIEJO IS NOT NULL)
+	(SELECT 
+		N.neumatico_numero_serie 
+	FROM gd_esquema.Maestra M 
+		JOIN [NOCURSOMASLOSSABADOS].[Neumatico] N
+	ON N.neumatico_numero_serie = M.NEUMATICO1_NRO_SERIE_NUEVO
+	WHERE M.NEUMATICO1_NRO_SERIE_NUEVO IS NOT NULL)
+	union
+
+	FROM gd_esquema.Maestra M 
+
 	WHERE M.NEUMATICO1_NRO_SERIE_VIEJO IS NOT NULL AND M.NEUMATICO1_NRO_SERIE_NUEVO IS NOT NULL
 
 END 
