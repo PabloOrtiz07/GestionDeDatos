@@ -3,7 +3,7 @@ GO
 
 
 /************************************/
-/*			SCHEMA  BI				*/
+/*			CREACION DIMENSIONES  BI				*/
 /************************************/
 
 CREATE TABLE  [NOCURSOMASLOSSABADOS].bi_dim_fecha
@@ -150,10 +150,31 @@ CREATE TABLE  [NOCURSOMASLOSSABADOS].bi_dim_escuderia
 	escuderia_pais integer
 )
 
+CREATE TABLE [NOCURSOMASLOSSABADOS].bi_dim_carrera
+(
+		carrera_codigo INTEGER PRIMARY KEY,
+		carrera_circuito int,
+		carrera_cantidad_vueltas int,
+		carrera_fecha date,
+		carrera_clima nvarchar(100),
+		carrera_total_carrera decimal(18,2)
+)
+
 
 /************************************/
-/*			CARGA  BI				*/
+/*			CARGA DIMENSIONES BI				*/
 /************************************/
+
+INSERT INTO [NOCURSOMASLOSSABADOS].bi_dim_fecha
+(
+	fecha_anio,
+	fecha_cuatrimestre
+)
+SELECT distinct
+	year(carrera_fecha),
+	DATEPART(QUARTER, carrera_fecha)
+FROM [NOCURSOMASLOSSABADOS].Carrera
+
 
 INSERT INTO [NOCURSOMASLOSSABADOS].bi_dim_sector_tipo
 (
@@ -398,6 +419,114 @@ SELECT
 	escuderia_pais
 FROM [NOCURSOMASLOSSABADOS].Escuderia
 
+
+INSERT INTO [NOCURSOMASLOSSABADOS].bi_dim_carrera
+(
+	carrera_codigo,
+	carrera_circuito,
+	carrera_cantidad_vueltas,
+	carrera_fecha,
+	carrera_clima,
+	carrera_total_carrera
+)
+SELECT 
+	carrera_codigo,
+	carrera_circuito,
+	carrera_cantidad_vueltas,
+	carrera_fecha,
+	carrera_clima,
+	carrera_total_carrera
+FROM [NOCURSOMASLOSSABADOS].Carrera
+
+
+/************************************/
+/*	CREACION Y CARGA DE BI_HECHO_MEDICION	*/
+/************************************/
+CREATE TABLE  [NOCURSOMASLOSSABADOS].bi_hecho_medicion
+(
+	hm_id INTEGER IDENTITY(1,1) PRIMARY KEY,
+	hm_motor INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_motor_medicion,
+	hm_caja INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_caja_de_cambio_medicion,
+	hm_freno INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_freno_medicion,
+	hm_neumatico INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_neumatico_medicion,
+	hm_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_circuito,
+	hm_sector INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_sector,
+	hm_fecha INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_fecha,
+	hm_motor_potencia DECIMAL(18,6),
+	hm_desgaste_caja decimal(18,2),
+	hm_freno_grosor decimal(18,2),
+	hm_neumatico_profundidad decimal(18,2),
+	hm_numero_vuelta decimal(18,0),
+	hm_tiempo_vuelta decimal(18,10),
+	hm_combustible decimal(18,2),
+	hm_velocidad decimal(18,2),
+	hm_auto_carrera INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_auto_carrera
+)
+
+INSERT INTO [NOCURSOMASLOSSABADOS].bi_hecho_medicion
+(
+	hm_motor, 
+	hm_caja,
+	hm_freno,
+	hm_neumatico,
+	hm_circuito,
+	hm_sector,
+	hm_fecha,
+	hm_motor_potencia,
+	hm_desgaste_caja,
+	hm_freno_grosor,
+	hm_neumatico_profundidad,
+	hm_numero_vuelta,
+	hm_tiempo_vuelta,
+	hm_combustible,
+	hm_velocidad,
+	hm_auto_carrera
+)
+SELECT DISTINCT
+	m.medicion_codigo,
+	--mm.motor_medicion_medicion,
+	--cm.caja_medicion_codigo,
+	--fm.freno_medicion_codigo,
+	--nm.neumatico_medicion_codigo,
+	c.circuito_codigo,
+	s.sector_codigo,
+	f.fecha_id,
+	mm.motor_medicion_potencia,
+	cm.caja_medicion_desgaste,
+	fm.freno_medicion_grosor,
+	nm.neumatico_medicion_profundidad,
+	m.medicion_numero_vuelta,
+	m.medicion_tiempo_vuelta,
+	m.medicion_combustible,
+	m.medicion_velocidad,
+	ac.auto_carrera_codigo
+FROM NOCURSOMASLOSSABADOS.bi_dim_medicion m
+JOIN NOCURSOMASLOSSABADOS.bi_dim_motor_medicion mm ON m.medicion_codigo = mm.motor_medicion_medicion
+JOIN NOCURSOMASLOSSABADOS.bi_dim_caja_de_cambio_medicion cm ON m.medicion_codigo = cm.caja_medicion_medicion
+JOIN NOCURSOMASLOSSABADOS.bi_dim_freno_medicion fm ON m.medicion_codigo = fm.freno_medicion_medicion
+JOIN NOCURSOMASLOSSABADOS.bi_dim_neumatico_medicion nm ON m.medicion_codigo = nm.neumatico_medicion_medicion
+JOIN NOCURSOMASLOSSABADOS.bi_dim_sector s ON m.medicion_sector = s.sector_codigo
+JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON s.sector_circuito = c.circuito_codigo
+JOIN NOCURSOMASLOSSABADOS.bi_dim_auto_carrera ac ON m.medicion_auto_carrera = ac.auto_carrera_codigo
+JOIN NOCURSOMASLOSSABADOS.bi_dim_carrera car ON ac.auto_carrera_carrera = car.carrera_codigo
+JOIN NOCURSOMASLOSSABADOS.bi_dim_fecha f ON f.fecha_anio = year(car.carrera_fecha) and f.fecha_cuatrimestre = DATEPART(QUARTER, car.carrera_fecha)
+
+
+
+select * from NOCURSOMASLOSSABADOS.Medicion--220617
+
+
+
+CREATE VIEW desgaste_motor
+AS
+SELECT 
+	sum(hm_motor_potencia)
+FROM NOCURSOMASLOSSABADOS.bi_hecho_medicion
+group by hm_auto_carrera, hm_numero_vuelta
+
+
+
+GO
 
 
 
