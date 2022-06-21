@@ -495,7 +495,7 @@ SELECT DISTINCT
 	cm.caja_medicion_desgaste,
 	fm.freno_medicion_grosor,
 	nm.neumatico_medicion_profundidad,
-	m.medicion_numero_vuelta,
+	m.medicion_numero_vuelta, 
 	m.medicion_tiempo_vuelta,
 	m.medicion_combustible,
 	m.medicion_velocidad,
