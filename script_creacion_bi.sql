@@ -810,9 +810,9 @@ group by c.circuitio_nombre, st.sector_tipo_descripcion, ac.auto_carrera_auto
 GO
 
 
-/***/
-/	CREACION Y CARGA DE BI_HECHO_PARADA	/
-/***/
+/************************************/
+/*	CREACION Y CARGA DE BI_HECHO_PARADA	*/
+/************************************/
 
 CREATE TABLE [NOCURSOMASLOSSABADOS].bi_hecho_parada
 (
@@ -852,3 +852,4 @@ AS
 	group by c.circuito_codigo, c.circuitio_nombre,p.parada_codigo
 	ORDER BY ISNULL(SUM(parada_tiempo),0) DESC
 GO
+
