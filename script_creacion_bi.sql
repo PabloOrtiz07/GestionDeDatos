@@ -4,6 +4,8 @@ GO
 /************************************/
 /*			DROP TABLAS BI				*/
 /************************************/
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_auto_incidente')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_auto_incidente;
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_fecha')
 		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_fecha;
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_sector_tipo')
@@ -43,11 +45,11 @@ IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_carrera')
 
 -------------- DROP TABLA HECHO ------------------------
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_hecho_medicion')
-		DROP TABLE [NOCURSOMASLOSSABADOS].bi_hecho_medicion;
---IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_hecho_incidente')
---		DROP TABLE [NOCURSOMASLOSSABADOS].bi_hecho_incidente;
---IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_hecho_parada')
---		DROP TABLE [NOCURSOMASLOSSABADOS].bi_hecho_parada;
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_hecho_medicion_v2;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_hecho_incidente')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_hecho_incidente_v2;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_hecho_parada')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_hecho_parada_v2;
 		
 
 /************************************/
