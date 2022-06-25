@@ -54,6 +54,15 @@ IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_hecho_medicion')
 /*			CREACION DIMENSIONES  BI				*/
 /************************************/
 
+CREATE TABLE  [NOCURSOMASLOSSABADOS].bi_dim_auto_incidente
+(
+	auto_incidente_codigo INTEGER IDENTITY PRIMARY KEY,
+	auto_incidente_auto integer,
+	auto_incidente_incidente_codigo integer,
+	auto_incidente_tipo integer,
+	auto_incidente_numero_vuelta decimal(18,0),
+)
+
 CREATE TABLE  [NOCURSOMASLOSSABADOS].bi_dim_fecha
 (
 	fecha_id INTEGER IDENTITY(1,1) PRIMARY KEY,
@@ -212,6 +221,24 @@ CREATE TABLE [NOCURSOMASLOSSABADOS].bi_dim_carrera
 /************************************/
 /*			CARGA DIMENSIONES BI				*/
 /************************************/
+
+
+INSERT INTO  [NOCURSOMASLOSSABADOS].bi_dim_auto_incidente
+(
+	auto_incidente_codigo,
+	auto_incidente_auto,
+	auto_incidente_incidente_codigo,
+	auto_incidente_tipo ,
+	auto_incidente_numero_vuelta,
+)
+SELECT
+	auto_incidente_codigo,
+	auto_incidente_auto,
+	auto_incidente_codigo,
+	auto_incidente_tipo,
+	auto_incidente_numero_vuelta
+FROM [NOCURSOMASLOSSABADOS].Auto_Incidente
+
 
 INSERT INTO [NOCURSOMASLOSSABADOS].bi_dim_fecha
 (
@@ -864,7 +891,12 @@ AS
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_escuderia e ON e.escuderia_codigo = hp.hp_escuderia
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_fecha f on f.fecha_anio = hp.hp_fecha
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_parada_box p on p.parada_codigo = hp.hp_parada
-	group by c.circuito_codigo, c.circuitio_nombre, e.escuderia_codigo, e.escuderia_nombre, fecha_anio
+	group by 
+		c.circuito_codigo,
+		c.circuitio_nombre,
+		e.escuderia_codigo,
+		e.escuderia_nombre,
+		fecha_anio
 GO
 
 CREATE VIEW circuitos_con_mayor_tiempo_parada_v2
@@ -876,7 +908,10 @@ AS
 	FROM NOCURSOMASLOSSABADOS.bi_hecho_parada_v2 hp
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON c.circuito_codigo = hp.hp_circuito
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_parada_box p on p.parada_codigo = hp.hp_parada
-	group by c.circuito_codigo, c.circuitio_nombre,p.parada_codigo
+	group by 
+		c.circuito_codigo,
+		c.circuitio_nombre,
+		p.parada_codigo
 	ORDER BY ISNULL(SUM(parada_tiempo),0) DESC
 GO
 
@@ -898,6 +933,46 @@ CREATE TABLE [NOCURSOMASLOSSABADOS].bi_hecho_incidente_v2
 	hi_incidente INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_incidente,
 )
 
+INSERT INTO [NOCURSOMASLOSSABADOS].bi_hecho_incidente_v2
+(
+	hi_incidente_tipo,
+	hi_circuito,
+	hi_fecha,
+	hi_sector,
+	hi_sector_tipo,
+	hi_escuderia,
+	hi_incidente
+)
+
+
+SELECT 
+	it.incidente_tipo_codigo,
+	c.circuito_codigo,
+	f.fecha_id,
+	s.sector_codigo,
+	st.sector_tipo_codigo,
+	e.escuderia_codigo,
+	i.incidente_codigo
+	
+FROM NOCURSOMASLOSSABADOS.bi_dim_incidente i
+JOIN NOCURSOMASLOSSABADOS.bi_dim_auto_incidente ai ON ai.auto_incidente_incidente_codigo=i.incidente_codigo
+JOIN NOCURSOMASLOSSABADOS.bi_dim_incidente_tipo it ON ai.auto_incidente_tipo=it.incidente_tipo_codigo
+JOIN NOCURSOMASLOSSABADOS.bi_dim_sector s ON s.sector_codigo=i.incidente_sector
+JOIN NOCURSOMASLOSSABADOS.bi_dim_sector_tipo st ON s.sector_tipo=st.sector_tipo_codigo
+JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON c.circuito_codigo=s.sector_circuito
+JOIN NOCURSOMASLOSSABADOS.bi_dim_carrera car ON c.circuito_codigo=car.carrera_circuito
+JOIN NOCURSOMASLOSSABADOS.bi_dim_auto_carrera ac ON ac.auto_carrera_auto = car.carrera_codigo
+JOIN NOCURSOMASLOSSABADOS.bi_dim_auto a ON a.auto_codigo = ac.auto_carrera_auto
+JOIN NOCURSOMASLOSSABADOS.bi_dim_escuderia e ON e.escuderia_codigo = a.auto_escuderia
+JOIN NOCURSOMASLOSSABADOS.bi_dim_fecha f ON f.fecha_anio = year(car.carrera_fecha)
+
+group by
+	c.circuito_codigo,
+	f.fecha_id,
+	s.sector_codigo,
+	st.sector_tipo_codigo,
+	e.escuderia_codigo,
+	i.incidente_codigo
 
 CREATE VIEW circuito_mas_peligrosos_v2
 AS
@@ -908,7 +983,9 @@ AS
 	FROM NOCURSOMASLOSSABADOS.bi_hecho_incidente_v2 hi
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_incidente i ON i.incidente_codigo = hi.hi_incidente
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON c.circuito_codigo = hi.hi_circuito
-	group by c.circuito_codigo, c.circuitio_nombre
+	group by
+		c.circuito_codigo,
+		c.circuitio_nombre
 	ORDER BY cantidadIncidentes DESC
 GO
 
