@@ -837,11 +837,13 @@ SELECT
 	e.escuderia_codigo,
 	p.parada_codigo,
 	c.circuito_codigo
-FROM NOCURSOMASLOSSABADOS.bi_dim_incidente i
-JOIN NOCURSOMASLOSSABADOS.bi_dim_sector s ON i.incidente_sector = s.sector_codigo 
-JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON s.sector_circuito = c.circuito_codigo
- 
-
+FROM NOCURSOMASLOSSABADOS.bi_dim_parada_box p
+JOIN NOCURSOMASLOSSABADOS.bi_dim_auto_carrera ac ON ac.auto_carrera_auto = p.parada_auto_carrera
+JOIN NOCURSOMASLOSSABADOS.bi_dim_auto a ON a.auto_codigo = ac.auto_carrera_auto
+JOIN NOCURSOMASLOSSABADOS.bi_dim_carrera car ON car.carrera_codigo = ac.auto_carrera_auto
+JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON c.circuito_codigo = car.carrera_circuito
+JOIN NOCURSOMASLOSSABADOS.bi_dim_escuderia e ON e.escuderia_codigo = a.auto_escuderia
+JOIN NOCURSOMASLOSSABADOS.bi_dim_fecha f ON f.fecha_anio = year(car.carrera_fecha) 
 
 
 CREATE VIEW cantidad_parada_de_circuitos_por_escuderia_por_anio_v2
@@ -860,7 +862,7 @@ AS
 	group by c.circuito_codigo, c.circuitio_nombre, e.escuderia_codigo, e.escuderia_nombre, fecha_anio
 GO
 
-CREATE VIEW circuitos_con_mayor_consumo_v2
+CREATE VIEW circuitos_con_mayor_tiempo_parada_v2
 AS
 	SELECT TOP 3
 		c.circuito_codigo,
