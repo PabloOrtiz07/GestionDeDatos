@@ -4,19 +4,12 @@ GO
 /************************************/
 /*			DROP TABLAS BI				*/
 /************************************/
--------------- DROP TABLA HECHO ------------------------
-IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_hecho_medicion')
-		DROP TABLE [NOCURSOMASLOSSABADOS].BI_hecho_medicion;
-IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_hecho_incidente')
-		DROP TABLE [NOCURSOMASLOSSABADOS].BI_hecho_incidente;
-IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_hecho_parada')
-		DROP TABLE [NOCURSOMASLOSSABADOS].BI_hecho_parada;
+
 
 -------------- DROP TABLA DIMENSIONES ------------------------
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_auto_incidente')
 		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_auto_incidente;
-IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_fecha')
-		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_fecha;
+
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_sector_tipo')
 		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_sector_tipo;
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_sector')
@@ -51,6 +44,16 @@ IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_escuderia')
 		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_escuderia;
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_carrera')
 		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_carrera;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_fecha')
+		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_fecha;
+
+		-------------- DROP TABLA HECHO ------------------------
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_hecho_medicion')
+		DROP TABLE [NOCURSOMASLOSSABADOS].BI_hecho_medicion;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_hecho_incidente')
+		DROP TABLE [NOCURSOMASLOSSABADOS].BI_hecho_incidente;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_hecho_parada')
+		DROP TABLE [NOCURSOMASLOSSABADOS].BI_hecho_parada;
 
 ------------- DROP VIEWS -----------------------------------
 IF EXISTS (SELECT name FROM sys.views WHERE name = 'desgaste_promedio_componente_auto_vuelta_circuito')
@@ -784,7 +787,6 @@ CREATE TABLE [NOCURSOMASLOSSABADOS].BI_hecho_parada
 	hp_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_escuderia,
 	hp_parada INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_parada_box,
 	hp_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_circuito,
-
 )
 
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_hecho_parada
