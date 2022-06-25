@@ -878,14 +878,15 @@ group by
 	c.circuito_codigo
 
 
-CREATE VIEW cantidad_parada_de_circuitos_por_escuderia_por_anio_v2
+CREATE VIEW cantidad_parada_de_circuitos_por_escuderia_anio_v2
 AS
 	SELECT
 		c.circuito_codigo,
 		c.circuitio_nombre,
 		e.escuderia_codigo,
 		e.escuderia_nombre,
-		COUNT(DISTINCT p.parada_codigo)	
+		f.fecha_anio,
+		COUNT(DISTINCT p.parada_codigo)	 as cantidadParadasPorAnio
 	FROM NOCURSOMASLOSSABADOS.bi_hecho_parada_v2 hp
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON c.circuito_codigo = hp.hp_circuito
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_escuderia e ON e.escuderia_codigo = hp.hp_escuderia
@@ -896,7 +897,7 @@ AS
 		c.circuitio_nombre,
 		e.escuderia_codigo,
 		e.escuderia_nombre,
-		fecha_anio
+		f.fecha_anio
 GO
 
 CREATE VIEW circuitos_con_mayor_tiempo_parada_v2
@@ -904,7 +905,7 @@ AS
 	SELECT TOP 3
 		c.circuito_codigo,
 		c.circuitio_nombre,
-		ISNULL(SUM(parada_tiempo),0)
+		ISNULL(SUM(parada_tiempo),0) as tiempoEnParada
 	FROM NOCURSOMASLOSSABADOS.bi_hecho_parada_v2 hp
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON c.circuito_codigo = hp.hp_circuito
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_parada_box p on p.parada_codigo = hp.hp_parada
@@ -912,7 +913,7 @@ AS
 		c.circuito_codigo,
 		c.circuitio_nombre,
 		p.parada_codigo
-	ORDER BY ISNULL(SUM(parada_tiempo),0) DESC
+	ORDER BY tiempoEnParada DESC
 GO
 
 
@@ -953,7 +954,6 @@ SELECT
 	st.sector_tipo_codigo,
 	e.escuderia_codigo,
 	i.incidente_codigo
-	
 FROM NOCURSOMASLOSSABADOS.bi_dim_incidente i
 JOIN NOCURSOMASLOSSABADOS.bi_dim_auto_incidente ai ON ai.auto_incidente_incidente_codigo=i.incidente_codigo
 JOIN NOCURSOMASLOSSABADOS.bi_dim_incidente_tipo it ON ai.auto_incidente_tipo=it.incidente_tipo_codigo
@@ -979,7 +979,7 @@ AS
 	SELECT TOP 3
 		c.circuito_codigo,
 		c.circuitio_nombre,
-		COUNT(DISTINCT incidente_codigo ) as cantidadIncidentes
+		COUNT(DISTINCT i.incidente_codigo ) as cantidadIncidentes
 	FROM NOCURSOMASLOSSABADOS.bi_hecho_incidente_v2 hi
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_incidente i ON i.incidente_codigo = hi.hi_incidente
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON c.circuito_codigo = hi.hi_circuito
@@ -987,6 +987,28 @@ AS
 		c.circuito_codigo,
 		c.circuitio_nombre
 	ORDER BY cantidadIncidentes DESC
+GO
+
+CREATE VIEW promedio_escuderia_anio_v2
+AS
+	SELECT
+		AVG(i.incidente_codigo) promedioPorAnio,
+		e.escuderia_codigo,
+		e.escuderia_nombre,
+		st.sector_tipo_codigo,
+		st.sector_tipo_descripcion,
+		f.fecha_anio
+	FROM NOCURSOMASLOSSABADOS.bi_hecho_incidente_v2 hi
+	JOIN NOCURSOMASLOSSABADOS.bi_dim_incidente i ON i.incidente_codigo = hi.hi_incidente
+	JOIN NOCURSOMASLOSSABADOS.bi_dim_escuderia e ON e.escuderia_codigo = hi.hi_escuderia
+	JOIN NOCURSOMASLOSSABADOS.bi_dim_sector_tipo st ON st.sector_tipo_codigo = hi.hi_sector_tipo
+	JOIN NOCURSOMASLOSSABADOS.bi_dim_fecha f on f.fecha_anio = hi.hi_fecha
+	group by
+		e.escuderia_codigo,
+		e.escuderia_nombre,
+		st.sector_tipo_codigo,
+		st.sector_tipo_descripcion,
+		f.fecha_anio
 GO
 
 
