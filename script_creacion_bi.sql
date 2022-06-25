@@ -1,6 +1,54 @@
 USE [GD1C2022]
 GO
 
+/************************************/
+/*			DROP TABLAS BI				*/
+/************************************/
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_fecha')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_fecha;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_sector_tipo')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_sector_tipo;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_sector')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_sector;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_incidente')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_incidente;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_incidente_tipo')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_incidente_tipo;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_circuito')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_circuito;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_neumatico_tipo')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_neumatico_tipo;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_auto')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_auto;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_auto_carrera')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_auto_carrera;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_piloto')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_piloto;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_freno_medicion')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_freno_medicion;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_neumatico_medicion')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_neumatico_medicion;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_caja_de_cambio_medicion')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_caja_de_cambio_medicion;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_motor_medicion')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_motor_medicion;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_medicion')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_medicion;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_parada_box')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_parada_box;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_escuderia')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_escuderia;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_dim_carrera')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_dim_carrera;
+
+-------------- DROP TABLA HECHO ------------------------
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_hecho_medicion')
+		DROP TABLE [NOCURSOMASLOSSABADOS].bi_hecho_medicion;
+--IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_hecho_incidente')
+--		DROP TABLE [NOCURSOMASLOSSABADOS].bi_hecho_incidente;
+--IF EXISTS (SELECT name FROM sys.tables WHERE name = 'bi_hecho_parada')
+--		DROP TABLE [NOCURSOMASLOSSABADOS].bi_hecho_parada;
+		
 
 /************************************/
 /*			CREACION DIMENSIONES  BI				*/
