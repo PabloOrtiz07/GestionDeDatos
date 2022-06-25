@@ -843,7 +843,12 @@ JOIN NOCURSOMASLOSSABADOS.bi_dim_auto a ON a.auto_codigo = ac.auto_carrera_auto
 JOIN NOCURSOMASLOSSABADOS.bi_dim_carrera car ON car.carrera_codigo = ac.auto_carrera_auto
 JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON c.circuito_codigo = car.carrera_circuito
 JOIN NOCURSOMASLOSSABADOS.bi_dim_escuderia e ON e.escuderia_codigo = a.auto_escuderia
-JOIN NOCURSOMASLOSSABADOS.bi_dim_fecha f ON f.fecha_anio = year(car.carrera_fecha) 
+JOIN NOCURSOMASLOSSABADOS.bi_dim_fecha f ON f.fecha_anio = year(car.carrera_fecha)
+group by
+ 	f.fecha_id,
+	e.escuderia_codigo,
+	p.parada_codigo,
+	c.circuito_codigo
 
 
 CREATE VIEW cantidad_parada_de_circuitos_por_escuderia_por_anio_v2
