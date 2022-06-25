@@ -814,7 +814,7 @@ GO
 /*	CREACION Y CARGA DE BI_HECHO_PARADA	*/
 /************************************/
 
-CREATE TABLE [NOCURSOMASLOSSABADOS].bi_hecho_parada
+CREATE TABLE [NOCURSOMASLOSSABADOS].bi_hecho_parada_v2
 (
 	hp_id INTEGER IDENTITY(1,1) PRIMARY KEY,
 	hp_fecha INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_fecha,
@@ -824,6 +824,26 @@ CREATE TABLE [NOCURSOMASLOSSABADOS].bi_hecho_parada
 
 )
 
+INSERT INTO [NOCURSOMASLOSSABADOS].bi_hecho_parada_v2
+(
+	hp_fecha,
+	hp_escuderia,
+	hp_parada,
+	hp_circuito
+)
+
+SELECT 
+	f.fecha_id,
+	e.escuderia_codigo,
+	p.parada_codigo,
+	c.circuito_codigo
+FROM NOCURSOMASLOSSABADOS.bi_dim_incidente i
+JOIN NOCURSOMASLOSSABADOS.bi_dim_sector s ON i.incidente_sector = s.sector_codigo 
+JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON s.sector_circuito = c.circuito_codigo
+ 
+
+
+
 CREATE VIEW cantidad_parada_de_circuitos_por_escuderia_por_anio_v2
 AS
 	SELECT
@@ -831,8 +851,8 @@ AS
 		c.circuitio_nombre,
 		e.escuderia_codigo,
 		e.escuderia_nombre,
-		COUNT(DISTINCT parada_codigo)	
-	FROM NOCURSOMASLOSSABADOS.bi_hecho_parada hp
+		COUNT(DISTINCT p.parada_codigo)	
+	FROM NOCURSOMASLOSSABADOS.bi_hecho_parada_v2 hp
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON c.circuito_codigo = hp.hp_circuito
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_escuderia e ON e.escuderia_codigo = hp.hp_escuderia
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_fecha f on f.fecha_anio = hp.hp_fecha
@@ -846,10 +866,43 @@ AS
 		c.circuito_codigo,
 		c.circuitio_nombre,
 		ISNULL(SUM(parada_tiempo),0)
-	FROM NOCURSOMASLOSSABADOS.bi_hecho_parada hp
+	FROM NOCURSOMASLOSSABADOS.bi_hecho_parada_v2 hp
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON c.circuito_codigo = hp.hp_circuito
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_parada_box p on p.parada_codigo = hp.hp_parada
 	group by c.circuito_codigo, c.circuitio_nombre,p.parada_codigo
 	ORDER BY ISNULL(SUM(parada_tiempo),0) DESC
 GO
+
+
+
+/************************************/
+/*	CREACION Y CARGA DE BI_HECHO_INCIDENTE	*/
+
+/************************************/
+CREATE TABLE [NOCURSOMASLOSSABADOS].bi_hecho_incidente_v2
+(
+	hi_id INTEGER IDENTITY(1,1) PRIMARY KEY,
+	hi_incidente_tipo INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_incidente_tipo,
+	hi_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_circuito,
+	hi_fecha INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_fecha,
+	hi_sector INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_sector,
+	hi_sector_tipo INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_sector_tipo,
+	hi_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_escuderia,
+	hi_incidente INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_incidente,
+)
+
+
+CREATE VIEW circuito_mas_peligrosos_v2
+AS
+	SELECT TOP 3
+		c.circuito_codigo,
+		c.circuitio_nombre,
+		COUNT(DISTINCT incidente_codigo ) as cantidadIncidentes
+	FROM NOCURSOMASLOSSABADOS.bi_hecho_incidente_v2 hi
+	JOIN NOCURSOMASLOSSABADOS.bi_dim_incidente i ON i.incidente_codigo = hi.hi_incidente
+	JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON c.circuito_codigo = hi.hi_circuito
+	group by c.circuito_codigo, c.circuitio_nombre
+	ORDER BY cantidadIncidentes DESC
+GO
+
 
