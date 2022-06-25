@@ -810,3 +810,45 @@ group by c.circuitio_nombre, st.sector_tipo_descripcion, ac.auto_carrera_auto
 GO
 
 
+/***/
+/	CREACION Y CARGA DE BI_HECHO_PARADA	/
+/***/
+
+CREATE TABLE [NOCURSOMASLOSSABADOS].bi_hecho_parada
+(
+	hp_id INTEGER IDENTITY(1,1) PRIMARY KEY,
+	hp_fecha INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_fecha,
+	hp_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_escuderia,
+	hp_parada INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_parada_box,
+	hp_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].bi_dim_circuito,
+
+)
+
+CREATE VIEW cantidad_parada_de_circuitos_por_escuderia_por_anio_v2
+AS
+	SELECT
+		c.circuito_codigo,
+		c.circuitio_nombre,
+		e.escuderia_codigo,
+		e.escuderia_nombre,
+		COUNT(DISTINCT parada_codigo)	
+	FROM NOCURSOMASLOSSABADOS.bi_hecho_parada hp
+	JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON c.circuito_codigo = hp.hp_circuito
+	JOIN NOCURSOMASLOSSABADOS.bi_dim_escuderia e ON e.escuderia_codigo = hp.hp_escuderia
+	JOIN NOCURSOMASLOSSABADOS.bi_dim_fecha f on f.fecha_anio = hp.hp_fecha
+	JOIN NOCURSOMASLOSSABADOS.bi_dim_parada_box p on p.parada_codigo = hp.hp_parada
+	group by c.circuito_codigo, c.circuitio_nombre, e.escuderia_codigo, e.escuderia_nombre, fecha_anio
+GO
+
+CREATE VIEW circuitos_con_mayor_consumo_v2
+AS
+	SELECT TOP 3
+		c.circuito_codigo,
+		c.circuitio_nombre,
+		ISNULL(SUM(parada_tiempo),0)
+	FROM NOCURSOMASLOSSABADOS.bi_hecho_parada hp
+	JOIN NOCURSOMASLOSSABADOS.bi_dim_circuito c ON c.circuito_codigo = hp.hp_circuito
+	JOIN NOCURSOMASLOSSABADOS.bi_dim_parada_box p on p.parada_codigo = hp.hp_parada
+	group by c.circuito_codigo, c.circuitio_nombre,p.parada_codigo
+	ORDER BY ISNULL(SUM(parada_tiempo),0) DESC
+GO
