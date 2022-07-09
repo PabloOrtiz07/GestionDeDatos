@@ -17,14 +17,12 @@ IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_hecho_parada')
 		DROP TABLE [NOCURSOMASLOSSABADOS].BI_hecho_parada;
 
 -------------- DROP TABLA DIMENSIONES ------------------------
-IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_auto_incidente')
-		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_auto_incidente;
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_fecha')
 		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_fecha;
-IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_sector_tipo')
-		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_sector_tipo;
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_sector')
 		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_sector;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_auto_incidente')
+		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_auto_incidente;
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_incidente')
 		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_incidente;
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_incidente_tipo')
@@ -35,26 +33,12 @@ IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_neumatico_tipo')
 		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_neumatico_tipo;
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_auto')
 		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_auto;
-IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_auto_carrera')
-		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_auto_carrera;
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_piloto')
 		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_piloto;
-IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_freno_medicion')
-		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_freno_medicion;
-IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_neumatico_medicion')
-		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_neumatico_medicion;
-IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_caja_de_cambio_medicion')
-		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_caja_de_cambio_medicion;
-IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_motor_medicion')
-		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_motor_medicion;
-IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_medicion')
-		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_medicion;
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_parada_box')
 		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_parada_box;
 IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_escuderia')
 		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_escuderia;
-IF EXISTS (SELECT name FROM sys.tables WHERE name = 'BI_dim_carrera')
-		DROP TABLE [NOCURSOMASLOSSABADOS].BI_dim_carrera;
 /*
 ------------- DROP VIEWS -----------------------------------
 IF EXISTS (SELECT name FROM sys.views WHERE name = 'desgaste_promedio_componente_auto_vuelta_circuito')
@@ -79,6 +63,19 @@ IF EXISTS (SELECT name FROM sys.views WHERE name = 'promedio_incidentes_escuderi
 /*			CREACION DIMENSIONES  BI				*/
 /************************************/
 
+CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_fecha
+(
+	fecha_id INTEGER IDENTITY(1,1) PRIMARY KEY,
+	fecha_anio integer,
+	fecha_cuatrimestre integer
+)
+
+CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_sector
+(
+	sector_codigo INTEGER PRIMARY KEY,
+	sector_tipo nvarchar(255)
+)
+
 CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_auto_incidente
 (
 	auto_incidente_codigo INTEGER PRIMARY KEY,
@@ -88,26 +85,6 @@ CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_auto_incidente
 	auto_incidente_numero_vuelta decimal(18,0),
 )
 
-CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_fecha
-(
-	fecha_id INTEGER IDENTITY(1,1) PRIMARY KEY,
-	fecha_anio integer,
-	fecha_cuatrimestre integer
-)
-
-CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_sector_tipo
-(
-	sector_tipo_codigo INTEGER PRIMARY KEY,
-	sector_tipo_descripcion nvarchar(255)
-)
-
-CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_sector
-(
-	sector_codigo INTEGER PRIMARY KEY,
-	sector_circuito integer,
-	sector_distancia decimal(18,2),
-	sector_tipo integer
-)
 
 CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_incidente
 (
@@ -127,8 +104,7 @@ CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_incidente_tipo
 CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_circuito
 (
 	circuito_codigo INTEGER PRIMARY KEY,
-	circuitio_nombre nvarchar(255),
-	circuito_pais integer
+	circuitio_nombre nvarchar(255)
 )
 
 CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_neumatico_tipo
@@ -140,81 +116,15 @@ CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_neumatico_tipo
 CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_auto
 (
 	auto_codigo INTEGER PRIMARY KEY,
-	auto_escuderia integer,
-	auto_piloto integer,
 	auto_modelo integer,
 	auto_numero integer
-)
-
-CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_auto_carrera
-(
-	auto_carrera_codigo INTEGER PRIMARY KEY,
-	auto_carrera_auto integer,
-	auto_carrera_carrera integer
 )
 
 CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_piloto
 (
 	piloto_codigo INTEGER PRIMARY KEY,
 	piloto_nombre nvarchar(50),
-	piloto_apellido nvarchar(50),
-	piloto_pais integer,
-	piloto_fecha_nacimiento date
-)
-
-CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_freno_medicion
-(
-	freno_medicion_codigo INTEGER PRIMARY KEY,
-	freno_medicion_medicion decimal(18,0),
-	freno_medicion_freno_numero_serie nvarchar(255),
-	freno_medicion_grosor decimal(18,2),
-	freno_medicion_temperatura decimal(18,2)
-)
-
-CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_neumatico_medicion
-(
-	neumatico_medicion_codigo INTEGER PRIMARY KEY,
-	neumatico_medicion_medicion decimal (18,0),
-	neumatico_medicion_neumatico_numero_serie nvarchar(255),
-	neumatico_medicion_profundidad decimal(18,6),
-	neumatico_medicion_presion decimal(18,6),
-	neumatico_medicion_temperatura decimal(18,6)
-)
-
-
-CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_caja_de_cambio_medicion
-(
-	caja_medicion_codigo INTEGER PRIMARY KEY,
-	caja_medicion_medicion decimal (18,0),
-	caja_medicion_caja_numero_serie nvarchar(255),
-	caja_medicion_temperatura_aceite decimal(18,2),
-	caja_medicion_rpm decimal(18,2),
-	caja_medicion_desgaste decimal(18,2)
-)
-
-CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_motor_medicion
-(
-	motor_medicion_codigo INTEGER PRIMARY KEY,
-	motor_medicion_medicion decimal (18,0),
-	motor_medicion_motor_numero_serie nvarchar(255),
-	motor_medicion_potencia decimal(18,6),
-	motor_medicion_temperatura_aceite decimal(18,6),
-	motor_medicion_temperatura_agua decimal(18,6),
-	motor_medicion_rpm decimal(18,6)
-)
-
-CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_medicion
-(
-	medicion_codigo decimal(18,0) PRIMARY KEY,
-	medicion_auto_carrera integer,
-	medicion_sector integer,
-	medicion_numero_vuelta decimal(18,2),
-	medicion_distancia_carrera decimal(18,2),
-	medicion_distancia_vuelta decimal(18,2),
-	medicion_tiempo_vuelta decimal(18,10),
-	medicion_posicion decimal(18,2),
-	medicion_velocidad decimal(18,2),
-	medicion_combustible decimal(18,2)
+	piloto_apellido nvarchar(50)
 )
 
 CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_parada_box
@@ -228,24 +138,35 @@ CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_parada_box
 CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_escuderia
 (
 	escuderia_codigo INTEGER PRIMARY KEY,
-	escuderia_nombre nvarchar(255),
-	escuderia_pais integer
-)
-
-CREATE TABLE [NOCURSOMASLOSSABADOS].BI_dim_carrera
-(
-		carrera_codigo INTEGER PRIMARY KEY,
-		carrera_circuito int,
-		carrera_cantidad_vueltas int,
-		carrera_fecha date,
-		carrera_clima nvarchar(100),
-		carrera_total_carrera decimal(18,2)
+	escuderia_nombre nvarchar(255)
 )
 
 
 /************************************/
 /*			CARGA DIMENSIONES BI				*/
 /************************************/
+
+INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_fecha
+(
+	fecha_anio,
+	fecha_cuatrimestre
+)
+SELECT distinct
+	year(carrera_fecha),
+	DATEPART(QUARTER, carrera_fecha)
+FROM [NOCURSOMASLOSSABADOS].Carrera
+
+
+INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_sector
+(
+	sector_codigo,
+	sector_tipo
+)
+SELECT 
+	s.sector_codigo,
+	st.sector_tipo_descripcion
+FROM [NOCURSOMASLOSSABADOS].Sector s
+JOIN NOCURSOMASLOSSABADOS.Sector_Tipo st on st.sector_tipo_codigo = s.sector_tipo
 
 
 INSERT INTO  [NOCURSOMASLOSSABADOS].BI_dim_auto_incidente
@@ -264,42 +185,6 @@ SELECT
 	auto_incidente_numero_vuelta
 FROM [NOCURSOMASLOSSABADOS].Auto_Incidente
 
-
-INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_fecha
-(
-	fecha_anio,
-	fecha_cuatrimestre
-)
-SELECT distinct
-	year(carrera_fecha),
-	DATEPART(QUARTER, carrera_fecha)
-FROM [NOCURSOMASLOSSABADOS].Carrera
-
-
-INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_sector_tipo
-(
-	sector_tipo_codigo,
-	sector_tipo_descripcion
-)
-SELECT 
-	sector_tipo_codigo,
-	sector_tipo_descripcion 
-FROM [NOCURSOMASLOSSABADOS].Sector_Tipo
-
-
-INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_sector
-(
-	sector_codigo,
-	sector_circuito,
-	sector_distancia,
-	sector_tipo
-)
-SELECT 
-	sector_codigo,
-	sector_circuito,
-	sector_distancia,
-	sector_tipo
-FROM [NOCURSOMASLOSSABADOS].Sector
 
 
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_incidente
@@ -331,13 +216,11 @@ FROM [NOCURSOMASLOSSABADOS].Incidente_Tipo
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_circuito
 (
 	circuito_codigo,
-	circuitio_nombre,
-	circuito_pais
+	circuitio_nombre
 )
 SELECT 
 	circuito_codigo,
-	circuito_nombre,
-	circuito_pais
+	circuito_nombre
 FROM [NOCURSOMASLOSSABADOS].Circuito
 
 
@@ -355,143 +238,28 @@ FROM [NOCURSOMASLOSSABADOS].Neumatico_Tipo
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_auto
 (
 	auto_codigo,
-	auto_escuderia,
-	auto_piloto,
 	auto_modelo,
 	auto_numero
 )
 SELECT 
 	auto_codigo,
-	auto_escuderia,
-	auto_piloto,
 	auto_modelo,
 	auto_numero
 FROM [NOCURSOMASLOSSABADOS].Auto
 
-INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_auto_carrera
-(
-	auto_carrera_codigo,
-	auto_carrera_auto,
-	auto_carrera_carrera
-)
-SELECT 
-	auto_carrera_codigo,
-	auto_carrera_auto,
-	auto_carrera_carrera
-FROM [NOCURSOMASLOSSABADOS].Auto_Carrera
 
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_piloto
 (
 	piloto_codigo,
 	piloto_nombre,
-	piloto_apellido,
-	piloto_pais,
-	piloto_fecha_nacimiento
+	piloto_apellido
 )
 SELECT 
 	piloto_codigo,
 	piloto_nombre,
-	piloto_apellido,
-	piloto_pais,
-	piloto_fecha_nacimiento
+	piloto_apellido
 FROM [NOCURSOMASLOSSABADOS].Piloto
 
-INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_freno_medicion
-(
-	freno_medicion_codigo,
-	freno_medicion_medicion,
-	freno_medicion_freno_numero_serie,
-	freno_medicion_grosor,
-	freno_medicion_temperatura
-)
-SELECT 
-	freno_medicion_codigo,
-	freno_medicion_medicion,
-	freno_medicion_freno_numero_serie,
-	freno_medicion_grosor,
-	freno_medicion_temperatura
-FROM [NOCURSOMASLOSSABADOS].Freno_medicion
-
-INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_neumatico_medicion
-(
-	neumatico_medicion_codigo,
-	neumatico_medicion_medicion,
-	neumatico_medicion_neumatico_numero_serie,
-	neumatico_medicion_profundidad,
-	neumatico_medicion_temperatura
-)
-SELECT 
-	neumatico_medicion_codigo,
-	neumatico_medicion_medicion,
-	neumatico_medicion_neumatico_numero_serie,
-	neumatico_medicion_profundidad,
-	neumatico_medicion_temperatura
-FROM [NOCURSOMASLOSSABADOS].Neumatico_medicion
-
-
-INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_caja_de_cambio_medicion
-(
-	caja_medicion_codigo,
-	caja_medicion_medicion,
-	caja_medicion_caja_numero_serie,
-	caja_medicion_temperatura_aceite,
-	caja_medicion_desgaste
-)
-SELECT 
-	caja_medicion_codigo,
-	caja_medicion_medicion,
-	caja_medicion_caja_numero_serie,
-	caja_medicion_temperatura_aceite,
-	caja_medicion_desgaste
-FROM [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Medicion
-
-
-INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_motor_medicion
-(
-	motor_medicion_codigo,
-	motor_medicion_medicion,
-	motor_medicion_motor_numero_serie,
-	motor_medicion_potencia,
-	motor_medicion_temperatura_aceite,
-	motor_medicion_temperatura_agua,
-	motor_medicion_rpm
-)
-SELECT 
-	motor_medicion_codigo,
-	motor_medicion_medicion,
-	motor_medicion_motor_numero_serie,
-	motor_medicion_potencia,
-	motor_medicion_temperatura_aceite,
-	motor_medicion_temperatura_agua,
-	motor_medicion_rpm
-FROM [NOCURSOMASLOSSABADOS].Motor_Medicion
-
-
-INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_medicion
-(
-	medicion_codigo,
-	medicion_auto_carrera,
-	medicion_sector,
-	medicion_numero_vuelta,
-	medicion_distancia_carrera,
-	medicion_distancia_vuelta,
-	medicion_tiempo_vuelta,
-	medicion_posicion,
-	medicion_velocidad,
-	medicion_combustible
-)
-SELECT 
-	medicion_codigo,
-	medicion_auto_carrera,
-	medicion_sector,
-	medicion_numero_vuelta,
-	medicion_distancia_carrera,
-	medicion_distancia_vuelta,
-	medicion_tiempo_vuelta,
-	medicion_posicion,
-	medicion_velocidad,
-	medicion_combustible
-FROM [NOCURSOMASLOSSABADOS].Medicion
 
 
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_parada_box
@@ -512,33 +280,14 @@ FROM [NOCURSOMASLOSSABADOS].Parada_Box
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_escuderia
 (
 	escuderia_codigo,
-	escuderia_nombre,
-	escuderia_pais
+	escuderia_nombre
 )
 SELECT 
 	escuderia_codigo,
-	escuderia_nombre,
-	escuderia_pais
+	escuderia_nombre
 FROM [NOCURSOMASLOSSABADOS].Escuderia
 
 
-INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_carrera
-(
-	carrera_codigo,
-	carrera_circuito,
-	carrera_cantidad_vueltas,
-	carrera_fecha,
-	carrera_clima,
-	carrera_total_carrera
-)
-SELECT 
-	carrera_codigo,
-	carrera_circuito,
-	carrera_cantidad_vueltas,
-	carrera_fecha,
-	carrera_clima,
-	carrera_total_carrera
-FROM [NOCURSOMASLOSSABADOS].Carrera
 
 
 /************************************/
@@ -550,7 +299,7 @@ CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_hecho_medicion --granularidad mas chica 
 	hm_fecha INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_fecha,
 	hm_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_escuderia,
 	hm_auto INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_auto,
-	hm_sector_tipo INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_sector_tipo, --VER SI ES SECTOR hm_sector INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_sector,
+	hm_sector INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_sector,
 	hm_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_circuito,
 	
 	hm_numero_vuelta decimal(18,0),
@@ -566,12 +315,13 @@ CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_hecho_medicion --granularidad mas chica 
 	hm_max_velocidad decimal(18,2)
 )
 
+
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_hecho_medicion
 (
 	hm_fecha,
 	hm_escuderia,
 	hm_auto,
-	hm_sector_tipo,
+	hm_sector,
 	hm_circuito,
 	
 	hm_numero_vuelta,
@@ -582,7 +332,7 @@ INSERT INTO [NOCURSOMASLOSSABADOS].BI_hecho_medicion
 	hm_caja_desgaste,
 	hm_freno_grosor_promedio,
 	hm_neumatico_profundidad_promedio,
-	hm_tiempo_vuelta,
+	hm_tiempo_vuelta, --tiempo de vuelta que consumio este sector. la suma de los tiempo_vuelta de los sectores nos da el tiempo de la vuelta total
 	hm_consumo_combustible,
 	hm_max_velocidad
 )
@@ -590,24 +340,27 @@ SELECT
 	f.fecha_id,
 	e.escuderia_codigo,
 	au.auto_codigo,
-	st.sector_tipo_codigo,
+	s.sector_codigo,
 	circ.circuito_codigo,
 	m.medicion_numero_vuelta,
 	p.piloto_codigo,
 	max(mm.motor_medicion_potencia) - min(mm.motor_medicion_potencia),
 	max(cm.caja_medicion_desgaste) - min(cm.caja_medicion_desgaste),
-	max(fm.freno_medicion_grosor) - min(fm.freno_medicion_grosor),
-	max(nm.neumatico_medicion_profundidad) - min(nm.neumatico_medicion_profundidad)
+	max(fm.freno_medicion_grosor) - min(fm.freno_medicion_grosor), --mmmm hay que ver si falta algun /4  --sum(fm.freno_medicion_grosor)/4 --subselect?
+	max(nm.neumatico_medicion_profundidad) - min(nm.neumatico_medicion_profundidad), --mmmm hay que ver si falta algun /4
+	max(m.medicion_tiempo_vuelta) - min(m.medicion_tiempo_vuelta), --el ultimo tiempo medido en cada sector - el primero. eso me da un minimo error de decimales, pq entre la ultima medicion de un sector y la primera del siguiente pasan unas decimas de segundo. Lo dejamos pasar no? sino creo que hay que hacer subselect para lo que va restado
+	max(m.medicion_combustible) - min(m.medicion_combustible),
+	max(m.medicion_velocidad)
 FROM NOCURSOMASLOSSABADOS.Medicion m
 join NOCURSOMASLOSSABADOS.Auto_Carrera ac on ac.auto_carrera_codigo = m.medicion_auto_carrera
 join NOCURSOMASLOSSABADOS.Carrera carr on carr.carrera_codigo = ac.auto_carrera_carrera
 join NOCURSOMASLOSSABADOS.BI_dim_fecha f on f.fecha_anio = year(carr.carrera_fecha) and f.fecha_cuatrimestre = DATEPART(QUARTER, carr.carrera_fecha)
 join NOCURSOMASLOSSABADOS.BI_dim_auto au on au.auto_codigo = ac.auto_carrera_auto --me cuesta saber si teia que joinear con auto o BI_dim_auto
-join NOCURSOMASLOSSABADOS.BI_dim_escuderia e on e.escuderia_codigo = au.auto_escuderia
-join NOCURSOMASLOSSABADOS.Sector s on s.sector_codigo = m.medicion_sector
-join NOCURSOMASLOSSABADOS.BI_dim_sector_tipo st on st.sector_tipo_codigo = s.sector_tipo
+join NOCURSOMASLOSSABADOS.Auto a on a.auto_codigo = ac.auto_carrera_auto
+join NOCURSOMASLOSSABADOS.BI_dim_escuderia e on e.escuderia_codigo = a.auto_escuderia
+join NOCURSOMASLOSSABADOS.BI_dim_sector s on s.sector_codigo = m.medicion_sector
 join NOCURSOMASLOSSABADOS.BI_dim_circuito circ on circ.circuito_codigo = carr.carrera_circuito
-join NOCURSOMASLOSSABADOS.BI_dim_piloto p on p.piloto_codigo = au.auto_piloto
+join NOCURSOMASLOSSABADOS.BI_dim_piloto p on p.piloto_codigo = a.auto_piloto
 join NOCURSOMASLOSSABADOS.Motor_Medicion mm on mm.motor_medicion_medicion = m.medicion_codigo
 join NOCURSOMASLOSSABADOS.Caja_De_Cambio_Medicion cm on cm.caja_medicion_medicion = m.medicion_codigo
 join NOCURSOMASLOSSABADOS.Freno_medicion fm on fm.freno_medicion_medicion = m.medicion_codigo
@@ -616,139 +369,38 @@ group by
 	f.fecha_id,
 	e.escuderia_codigo,
 	au.auto_codigo,
-	st.sector_tipo_codigo, --el mas chico
+	s.sector_codigo, --el mas chico
 	circ.circuito_codigo,
 	m.medicion_numero_vuelta,
 	p.piloto_codigo
+GO
 
 
---select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 19 and medicion_numero_vuelta = 17 and medicion_sector in (1,4,7) order by medicion_combustible
+--select * from NOCURSOMASLOSSABADOS.Medicion 
+--join NOCURSOMASLOSSABADOS.Freno_medicion on freno_medicion_medicion = medicion_codigo
+--where medicion_auto_carrera = 19 and medicion_numero_vuelta = 17
+
 --select * from NOCURSOMASLOSSABADOS.Carrera where carrera_circuito = 1
 --select * from NOCURSOMASLOSSABADOS.Auto where auto_codigo = 14
 --select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 1 and auto_carrera_auto = 14 --ac 19
 --select * from NOCURSOMASLOSSABADOS.Sector where sector_tipo = 2
 
 
-/*
-	m.medicion_codigo,
-	mm.motor_medicion_medicion,
-	cm.caja_medicion_medicion,
-	fm.freno_medicion_medicion,
-	nm.neumatico_medicion_medicion,
-	c.circuito_codigo,
-	s.sector_codigo,
-	f.fecha_id,
-	sum(fm.freno_medicion_grosor)/4,
-	sum(nm.neumatico_medicion_profundidad)/4,
-	ac.auto_carrera_codigo,
-	a.auto_codigo,
-	e.escuderia_codigo,
-	st.sector_tipo_codigo
-FROM NOCURSOMASLOSSABADOS.BI_dim_medicion m
-JOIN NOCURSOMASLOSSABADOS.BI_dim_motor_medicion mm ON m.medicion_codigo = mm.motor_medicion_medicion
-JOIN NOCURSOMASLOSSABADOS.BI_dim_caja_de_cambio_medicion cm ON m.medicion_codigo = cm.caja_medicion_medicion
-JOIN NOCURSOMASLOSSABADOS.BI_dim_freno_medicion fm ON m.medicion_codigo = fm.freno_medicion_medicion
-JOIN NOCURSOMASLOSSABADOS.BI_dim_neumatico_medicion nm ON m.medicion_codigo = nm.neumatico_medicion_medicion
-JOIN NOCURSOMASLOSSABADOS.BI_dim_sector s ON m.medicion_sector = s.sector_codigo
-JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON s.sector_circuito = c.circuito_codigo
-JOIN NOCURSOMASLOSSABADOS.BI_dim_auto_carrera ac ON m.medicion_auto_carrera = ac.auto_carrera_codigo
-JOIN NOCURSOMASLOSSABADOS.BI_dim_carrera car ON ac.auto_carrera_carrera = car.carrera_codigo
-JOIN NOCURSOMASLOSSABADOS.BI_dim_fecha f ON f.fecha_anio = year(car.carrera_fecha) and f.fecha_cuatrimestre = DATEPART(QUARTER, car.carrera_fecha)
-JOIN NOCURSOMASLOSSABADOS.BI_dim_auto a ON a.auto_codigo = ac.auto_carrera_auto
-JOIN NOCURSOMASLOSSABADOS.BI_dim_escuderia e ON a.auto_escuderia = e.escuderia_codigo
-JOIN NOCURSOMASLOSSABADOS.BI_dim_sector_tipo st ON s.sector_tipo = st.sector_tipo_codigo
-group by 
-	m.medicion_codigo,
-	mm.motor_medicion_medicion,
-	cm.caja_medicion_medicion,
-	fm.freno_medicion_medicion,
-	nm.neumatico_medicion_medicion,
-	c.circuito_codigo,
-	s.sector_codigo,
-	f.fecha_id,
-	ac.auto_carrera_codigo,
-	a.auto_codigo,
-	e.escuderia_codigo,
-	st.sector_tipo_codigo
-GO
-*/
-
 CREATE VIEW [NOCURSOMASLOSSABADOS].desgaste_promedio_componente_auto_vuelta_circuito
 AS
 SELECT
-	e.escuderia_nombre, 
-	a.auto_numero,
 	c.circuitio_nombre,
-	m.medicion_numero_vuelta,
-	(select top 1 mm.motor_medicion_potencia --selecciono primera medicion de la vuelta
-		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_motor_medicion mm ON mm.motor_medicion_codigo = hm2.hm_motor
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_medicion m2 ON m2.medicion_codigo = hm2.hm_medicion
-		where hm2.hm_auto_carrera = hm.hm_auto_carrera
-		and m2.medicion_numero_vuelta = m.medicion_numero_vuelta
-		order by m2.medicion_tiempo_vuelta asc
-	) -
-	(select top 1 mm.motor_medicion_potencia --selecciono ultima medicion de la vuelta
-		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_motor_medicion mm ON mm.motor_medicion_codigo = hm2.hm_motor
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_medicion m2 ON m2.medicion_codigo = hm2.hm_medicion
-		where hm2.hm_auto_carrera = hm.hm_auto_carrera
-		and m2.medicion_numero_vuelta = m.medicion_numero_vuelta
-		order by m2.medicion_tiempo_vuelta desc
-	) as desgaste_motor
-	,
-	(select top 1 cm.caja_medicion_desgaste 
-		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_caja_de_cambio_medicion cm ON cm.caja_medicion_codigo = hm2.hm_caja
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_medicion m2 ON m2.medicion_codigo = hm2.hm_medicion
-		where hm2.hm_auto_carrera = hm.hm_auto_carrera
-		and m2.medicion_numero_vuelta = m.medicion_numero_vuelta
-		order by m2.medicion_tiempo_vuelta asc
-	) -
-	(select top 1 cm.caja_medicion_desgaste 
-		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_caja_de_cambio_medicion cm ON cm.caja_medicion_codigo = hm2.hm_caja
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_medicion m2 ON m2.medicion_codigo = hm2.hm_medicion
-		where hm2.hm_auto_carrera = hm.hm_auto_carrera
-		and m2.medicion_numero_vuelta = m.medicion_numero_vuelta
-		order by m2.medicion_tiempo_vuelta desc
-	) as desgaste_caja
-	,
-	(select top 1 hm2.hm_neumatico_profundidad_promedio /4 --selecciono primera medicion de la vuelta
-		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_medicion m2 ON m2.medicion_codigo = hm2.hm_medicion
-		where hm2.hm_auto_carrera = hm.hm_auto_carrera
-		and m2.medicion_numero_vuelta = m.medicion_numero_vuelta
-		order by m2.medicion_tiempo_vuelta asc
-	) -
-	(select top 1 hm2.hm_neumatico_profundidad_promedio /4 --selecciono ultima medicion de la vuelta
-		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_medicion m2 ON m2.medicion_codigo = hm2.hm_medicion
-		where hm2.hm_auto_carrera = hm.hm_auto_carrera
-		and m2.medicion_numero_vuelta = m.medicion_numero_vuelta
-		order by m2.medicion_tiempo_vuelta desc
-	) as desgaste_neumaticos
-	,
-	(select top 1 hm2.hm_freno_grosor_promedio /4 
-		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_medicion m2 ON m2.medicion_codigo = hm2.hm_medicion
-		where hm2.hm_auto_carrera = hm.hm_auto_carrera
-		and m2.medicion_numero_vuelta = m.medicion_numero_vuelta
-		order by m2.medicion_tiempo_vuelta asc
-	) -
-	(select top 1 hm2.hm_freno_grosor_promedio /4 
-		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_medicion m2 ON m2.medicion_codigo = hm2.hm_medicion
-		where hm2.hm_auto_carrera = hm.hm_auto_carrera
-		and m2.medicion_numero_vuelta = m.medicion_numero_vuelta
-		order by m2.medicion_tiempo_vuelta desc
-	) as desgaste_frenos
+	a.auto_modelo, a.auto_numero,
+	hm.hm_numero_vuelta,
+	sum(hm.hm_motor_potencia_desgastada) as desgaste_motor,
+	sum(hm.hm_caja_desgaste) as desgaste_caja,
+	sum(hm.hm_freno_grosor_promedio) as desgaste_frenos,
+	sum(hm.hm_neumatico_profundidad_promedio) as desgaste_neumaticos
 FROM NOCURSOMASLOSSABADOS.BI_hecho_medicion hm
 JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuito
-JOIN NOCURSOMASLOSSABADOS.BI_dim_medicion m ON m.medicion_codigo = hm.hm_medicion
 JOIN NOCURSOMASLOSSABADOS.BI_dim_auto a ON a.auto_codigo = hm_auto
-JOIN NOCURSOMASLOSSABADOS.BI_dim_escuderia e ON e.escuderia_codigo = hm.hm_escuderia
-group by e.escuderia_codigo, e.escuderia_nombre, a.auto_codigo, a.auto_numero, c.circuitio_nombre, m.medicion_numero_vuelta, hm_auto_carrera
+group by c.circuitio_nombre, a.auto_modelo, a.auto_numero, hm.hm_numero_vuelta
+order by 1, 2,3,4
 GO
 
 
@@ -758,71 +410,60 @@ SELECT
 	f.fecha_anio,
 	c.circuitio_nombre,
 	e.escuderia_nombre,
-	(select	min(tiempo_de_vuelta)
-	from
-		(select max(m.medicion_tiempo_vuelta) as tiempo_de_vuelta
-			from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
-			JOIN NOCURSOMASLOSSABADOS.BI_dim_fecha f2 ON hm2.hm_fecha = f2.fecha_id
-			JOIN NOCURSOMASLOSSABADOS.Medicion m ON hm2.hm_medicion = m.medicion_codigo
-			where hm2.hm_escuderia = e.escuderia_codigo
-				and hm2.hm_circuito = c.circuito_codigo
-				and f2.fecha_anio = f.fecha_anio
-			group by m.medicion_numero_vuelta
-		) as tabla
+	(select top 1 sum(hm2.hm_tiempo_vuelta) --esto me trae el tiempo de vuelta total de cada vuelta
+		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
+		where hm2.hm_circuito = hm.hm_circuito 
+		and hm2.hm_escuderia = hm.hm_escuderia
+		and hm2.hm_fecha = hm.hm_fecha
+		group by hm2.hm_circuito, hm2.hm_auto, hm2.hm_numero_vuelta
+		having sum(hm2.hm_tiempo_vuelta) > 0 --sino me traia 0 pq capaz un auto corrio 0 
+		order by 1 asc
 	) as mejor_tiempo_vuelta
 FROM NOCURSOMASLOSSABADOS.BI_hecho_medicion hm
-JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuito
 JOIN NOCURSOMASLOSSABADOS.BI_dim_fecha f ON f.fecha_id = hm.hm_fecha
+JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuito
 JOIN NOCURSOMASLOSSABADOS.BI_dim_escuderia e ON e.escuderia_codigo = hm.hm_escuderia
-group by f.fecha_anio, c.circuito_codigo, c.circuitio_nombre, e.escuderia_codigo, e.escuderia_nombre
+group by f.fecha_anio, c.circuito_codigo, c.circuitio_nombre, e.escuderia_codigo, e.escuderia_nombre, hm.hm_circuito, hm.hm_escuderia, hm.hm_fecha 
+order by 1,2,3
 GO
+
+--select * from NOCURSOMASLOSSABADOS.Carrera where carrera_circuito = 1 
+--select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 1 --este auto la vuelta 3 tiene una sola medicion (habrá chocado ponele)
+--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_codigo = 17 --auto 12 carrera 1
+
 
 
 CREATE VIEW [NOCURSOMASLOSSABADOS].circuitos_mayor_consumo_combustible_promedio
 AS
 SELECT top 3 
 	c.circuitio_nombre,
-	(select sum(consumo_auto_carrera)
-		from 
-			(select max(m2.medicion_combustible) - min(m2.medicion_combustible) as consumo_auto_carrera
-				from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
-				JOIN NOCURSOMASLOSSABADOS.BI_dim_medicion m2 ON hm2.hm_medicion = m2.medicion_codigo
-				JOIN NOCURSOMASLOSSABADOS.BI_dim_sector s2 ON m2.medicion_sector = s2.sector_codigo
-				where s2.sector_circuito = hm.hm_circuito
-				group by m2.medicion_auto_carrera
-			) as tabla
-	)
-	/
-	(select count(distinct m3.medicion_auto_carrera) 
-		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm3
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_medicion m3 ON hm3.hm_medicion = m3.medicion_codigo
-		JOIN NOCURSOMASLOSSABADOS.BI_dim_sector s3 ON m3.medicion_sector = s3.sector_codigo
-		where s3.sector_circuito = hm.hm_circuito
-	)
-	as consumo_promedio_combustible
-
+	--hm.hm_auto,
+	sum(hm.hm_consumo_combustible)
 FROM NOCURSOMASLOSSABADOS.BI_hecho_medicion hm
 JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuito
-group by c.circuito_codigo, c.circuitio_nombre, hm.hm_circuito
+group by c.circuito_codigo, c.circuitio_nombre, hm.hm_circuito--, hm.hm_auto
 GO
+--lo comnetado estaba de prueba nomas. Parece q esta bien, salvo eso de la pregunta del foro
+
+--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 11 --ac 16
+--select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 16 --600 - 194 = 406
 
 
 CREATE VIEW [NOCURSOMASLOSSABADOS].max_velocidad_cada_auto_en_tipo_sector_en_circuito
 AS
 SELECT 
 	c.circuitio_nombre,
-	st.sector_tipo_descripcion,
-	e.escuderia_nombre, 
-	a.auto_numero,
-	max(m.medicion_velocidad) as max_velocidad
+	a.auto_modelo, a.auto_numero,
+	s.sector_tipo,
+	max(hm.hm_max_velocidad) as max_velocidad
 FROM NOCURSOMASLOSSABADOS.BI_hecho_medicion hm
 JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuito
-JOIN NOCURSOMASLOSSABADOS.BI_dim_sector_tipo st ON st.sector_tipo_codigo = hm.hm_sector_tipo
-JOIN NOCURSOMASLOSSABADOS.BI_dim_medicion m ON m.medicion_codigo = hm.hm_medicion
 JOIN NOCURSOMASLOSSABADOS.BI_dim_auto a ON a.auto_codigo = hm.hm_auto
-JOIN NOCURSOMASLOSSABADOS.BI_dim_escuderia e ON e.escuderia_codigo = hm.hm_escuderia
-group by c.circuitio_nombre, st.sector_tipo_descripcion, e.escuderia_nombre, a.auto_numero
+JOIN NOCURSOMASLOSSABADOS.BI_dim_sector s ON s.sector_codigo = hm.hm_sector
+group by c.circuitio_nombre, a.auto_modelo, a.auto_numero, s.sector_tipo
+order by 1,2,3,4
 GO
+
 
 
 /************************************/
