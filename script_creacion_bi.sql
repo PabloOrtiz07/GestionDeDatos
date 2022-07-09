@@ -544,43 +544,92 @@ FROM [NOCURSOMASLOSSABADOS].Carrera
 /************************************/
 /*	CREACION Y CARGA DE BI_HECHO_MEDICION	*/
 /************************************/
-CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_hecho_medicion
+CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_hecho_medicion --granularidad mas chica es sector
 (
 	hm_id INTEGER IDENTITY(1,1) PRIMARY KEY,
-	hm_medicion decimal(18,0) FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_medicion,
-	hm_motor INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_motor_medicion,
-	hm_caja INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_caja_de_cambio_medicion,
-	hm_freno INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_freno_medicion,
-	hm_neumatico INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_neumatico_medicion,
-	hm_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_circuito,
-	hm_sector INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_sector,
 	hm_fecha INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_fecha,
+	hm_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_escuderia,
+	hm_auto INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_auto,
+	hm_sector_tipo INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_sector_tipo, --VER SI ES SECTOR hm_sector INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_sector,
+	hm_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_circuito,
+	
+	hm_numero_vuelta decimal(18,0),
+
+	hm_piloto INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_piloto,
+	
+	hm_motor_potencia_desgastada decimal(18,6),
+	hm_caja_desgaste decimal(18,2),
 	hm_freno_grosor_promedio decimal(18,2),
 	hm_neumatico_profundidad_promedio decimal(18,6),
-	hm_auto_carrera INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_auto_carrera,
-	hm_auto INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_auto,
-	hm_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_escuderia,
-	hm_sector_tipo INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_sector_tipo,
+	hm_tiempo_vuelta decimal(18,10),
+	hm_consumo_combustible decimal(18,2),
+	hm_max_velocidad decimal(18,2)
 )
 
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_hecho_medicion
 (
-	hm_medicion,
-	hm_motor, 
-	hm_caja,
-	hm_freno,
-	hm_neumatico,
-	hm_circuito,
-	hm_sector,
 	hm_fecha,
+	hm_escuderia,
+	hm_auto,
+	hm_sector_tipo,
+	hm_circuito,
+	
+	hm_numero_vuelta,
+
+	hm_piloto,
+	
+	hm_motor_potencia_desgastada,
+	hm_caja_desgaste,
 	hm_freno_grosor_promedio,
 	hm_neumatico_profundidad_promedio,
-	hm_auto_carrera,
-	hm_auto,
-	hm_escuderia,
-	hm_sector_tipo
+	hm_tiempo_vuelta,
+	hm_consumo_combustible,
+	hm_max_velocidad
 )
 SELECT
+	f.fecha_id,
+	e.escuderia_codigo,
+	au.auto_codigo,
+	st.sector_tipo_codigo,
+	circ.circuito_codigo,
+	m.medicion_numero_vuelta,
+	p.piloto_codigo,
+	max(mm.motor_medicion_potencia) - min(mm.motor_medicion_potencia),
+	max(cm.caja_medicion_desgaste) - min(cm.caja_medicion_desgaste),
+	max(fm.freno_medicion_grosor) - min(fm.freno_medicion_grosor),
+	max(nm.neumatico_medicion_profundidad) - min(nm.neumatico_medicion_profundidad)
+FROM NOCURSOMASLOSSABADOS.Medicion m
+join NOCURSOMASLOSSABADOS.Auto_Carrera ac on ac.auto_carrera_codigo = m.medicion_auto_carrera
+join NOCURSOMASLOSSABADOS.Carrera carr on carr.carrera_codigo = ac.auto_carrera_carrera
+join NOCURSOMASLOSSABADOS.BI_dim_fecha f on f.fecha_anio = year(carr.carrera_fecha) and f.fecha_cuatrimestre = DATEPART(QUARTER, carr.carrera_fecha)
+join NOCURSOMASLOSSABADOS.BI_dim_auto au on au.auto_codigo = ac.auto_carrera_auto --me cuesta saber si teia que joinear con auto o BI_dim_auto
+join NOCURSOMASLOSSABADOS.BI_dim_escuderia e on e.escuderia_codigo = au.auto_escuderia
+join NOCURSOMASLOSSABADOS.Sector s on s.sector_codigo = m.medicion_sector
+join NOCURSOMASLOSSABADOS.BI_dim_sector_tipo st on st.sector_tipo_codigo = s.sector_tipo
+join NOCURSOMASLOSSABADOS.BI_dim_circuito circ on circ.circuito_codigo = carr.carrera_circuito
+join NOCURSOMASLOSSABADOS.BI_dim_piloto p on p.piloto_codigo = au.auto_piloto
+join NOCURSOMASLOSSABADOS.Motor_Medicion mm on mm.motor_medicion_medicion = m.medicion_codigo
+join NOCURSOMASLOSSABADOS.Caja_De_Cambio_Medicion cm on cm.caja_medicion_medicion = m.medicion_codigo
+join NOCURSOMASLOSSABADOS.Freno_medicion fm on fm.freno_medicion_medicion = m.medicion_codigo
+join NOCURSOMASLOSSABADOS.Neumatico_Medicion nm on nm.neumatico_medicion_medicion = m.medicion_codigo
+group by
+	f.fecha_id,
+	e.escuderia_codigo,
+	au.auto_codigo,
+	st.sector_tipo_codigo, --el mas chico
+	circ.circuito_codigo,
+	m.medicion_numero_vuelta,
+	p.piloto_codigo
+
+
+--select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 19 and medicion_numero_vuelta = 17 and medicion_sector in (1,4,7) order by medicion_combustible
+--select * from NOCURSOMASLOSSABADOS.Carrera where carrera_circuito = 1
+--select * from NOCURSOMASLOSSABADOS.Auto where auto_codigo = 14
+--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 1 and auto_carrera_auto = 14 --ac 19
+--select * from NOCURSOMASLOSSABADOS.Sector where sector_tipo = 2
+
+
+/*
 	m.medicion_codigo,
 	mm.motor_medicion_medicion,
 	cm.caja_medicion_medicion,
@@ -622,6 +671,7 @@ group by
 	e.escuderia_codigo,
 	st.sector_tipo_codigo
 GO
+*/
 
 CREATE VIEW [NOCURSOMASLOSSABADOS].desgaste_promedio_componente_auto_vuelta_circuito
 AS
