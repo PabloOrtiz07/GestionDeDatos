@@ -188,7 +188,7 @@ INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_incidente_tipo
 SELECT 
 	incidente_tipo_codigo,
 	incidente_tipo_descripcion
-FROM [NOCURSOMASLOSSABADOS].Incidente_Tipo it
+FROM [NOCURSOMASLOSSABADOS].Incidente_Tipo
 
 
 
@@ -448,13 +448,16 @@ GO
 /*	CREACION Y CARGA DE BI_HECHO_PARADA	*/
 /************************************/
 
+DROP TABLE NOCURSOMASLOSSABADOS.BI_hecho_parada
 CREATE TABLE [NOCURSOMASLOSSABADOS].BI_hecho_parada
 (
 	hp_id INTEGER IDENTITY(1,1) PRIMARY KEY,
 	hp_fecha INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_fecha,
 	hp_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_escuderia,
 	hp_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_circuito,
+	hp_cantidad_paradas integer,
 	hp_tiempo_parada decimal(18,2),
+	hp_tiempo_parada_promedio decimal (18,2)
 )
 
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_hecho_parada
@@ -462,14 +465,18 @@ INSERT INTO [NOCURSOMASLOSSABADOS].BI_hecho_parada
 	hp_fecha,
 	hp_escuderia,
 	hp_circuito,
-	hp_tiempo_parada
+	hp_cantidad_paradas,
+	hp_tiempo_parada,
+	hp_tiempo_parada_promedio
 )
 
 SELECT 
 	f.fecha_id,
 	e.escuderia_codigo,
 	c.circuito_codigo,
-	sum(p.parada_tiempo)
+	count(distinct p.parada_codigo) as cantidadParadas,
+	isnull(sum(p.parada_tiempo),0),
+	avg(p.parada_tiempo)
 FROM NOCURSOMASLOSSABADOS.Parada_Box p
 JOIN NOCURSOMASLOSSABADOS.Auto_Carrera ac ON ac.auto_carrera_codigo = p.parada_auto_carrera
 JOIN NOCURSOMASLOSSABADOS.Carrera car ON car.carrera_codigo = ac.auto_carrera_carrera
@@ -488,13 +495,14 @@ AS
 	SELECT
 		e.escuderia_nombre,
 		f.fecha_cuatrimestre,
-		AVG(hp.hp_tiempo_parada) as PromedioPorCuatrimestre
+		hp.hp_tiempo_parada_promedio as PromedioPorCuatrimestre
 	FROM NOCURSOMASLOSSABADOS.bi_hecho_parada hp
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_escuderia e ON e.escuderia_codigo = hp.hp_escuderia
 	JOIN NOCURSOMASLOSSABADOS.bi_dim_fecha f on f.fecha_id = hp.hp_fecha
 	group by 
 		e.escuderia_nombre,
-		f.fecha_cuatrimestre
+		f.fecha_cuatrimestre,
+		hp.hp_tiempo_parada_promedio
 GO
 
 
@@ -504,7 +512,7 @@ AS
 		c.circuitio_nombre,
 		e.escuderia_nombre,
 		f.fecha_anio,
-		COUNT(distinct hp_id)	 as cantidadParadasPorAnio
+		hp.hp_cantidad_paradas
 	FROM NOCURSOMASLOSSABADOS.BI_hecho_parada hp
 	JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hp.hp_circuito
 	JOIN NOCURSOMASLOSSABADOS.BI_dim_escuderia e ON e.escuderia_codigo = hp.hp_escuderia
@@ -514,14 +522,15 @@ AS
 		c.circuitio_nombre,
 		e.escuderia_codigo,
 		e.escuderia_nombre,
-		f.fecha_anio
+		f.fecha_anio,
+		hp.hp_cantidad_paradas
 GO
 
 CREATE VIEW [NOCURSOMASLOSSABADOS].tres_circuitos_con_mayor_tiempo_parada
 AS
 	SELECT TOP 3
 		c.circuitio_nombre,
-		sum(hp.hp_tiempo_parada) as tiempoEnParada
+		isnull(sum(hp.hp_tiempo_parada),0) as tiempoEnParada
 	FROM NOCURSOMASLOSSABADOS.BI_hecho_parada hp
 	JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hp.hp_circuito
 	group by 
@@ -548,14 +557,14 @@ join NOCURSOMASLOSSABADOS.Auto_Carrera on auto_carrera_carrera=carrera_codigo
 join NOCURSOMASLOSSABADOS.Auto on auto_codigo=auto_carrera_auto
 join NOCURSOMASLOSSABADOS.Escuderia on auto_escuderia=escuderia_codigo
 join NOCURSOMASLOSSABADOS.Parada_Box on auto_carrera_codigo=parada_auto_carrera
-where circuito_nombre='CIRCUITO Nro: 1' and escuderia_nombre='Red Bull Racing' and YEAR(carrera_fecha)='2021' -- me falla
+where circuito_nombre='CIRCUITO Nro: 1' and escuderia_nombre='Red Bull Racing' and YEAR(carrera_fecha)='2020' -- me falla
 
 
 
 /************************************/
 /*	CREACION Y CARGA DE BI_HECHO_INCIDENTE	*/
 /************************************/
-
+DROP TABLE NOCURSOMASLOSSABADOS.BI_HECHO_INCIDENTE
 CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_hecho_incidente
 (
 	hi_id INTEGER IDENTITY(1,1) PRIMARY KEY,
@@ -563,7 +572,7 @@ CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_hecho_incidente
 	hi_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_escuderia,
 	hi_sector INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_sector,
 	hi_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_circuito,
-	hi_incidente_tipo INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_incidente_tipo
+	hi_cantidad_incidente INTEGER
 )
 
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_hecho_incidente
@@ -572,7 +581,7 @@ INSERT INTO [NOCURSOMASLOSSABADOS].BI_hecho_incidente
 	hi_escuderia,
 	hi_sector,
 	hi_circuito,
-	hi_incidente_tipo
+	hi_cantidad_incidente
 )
 
 SELECT
@@ -580,12 +589,12 @@ SELECT
 	e.escuderia_codigo,
 	s.sector_codigo,
 	circ.circuito_codigo,
-	it.incidente_tipo_codigo
+	count(distinct i.incidente_codigo) as cantidadIncidentes
 FROM NOCURSOMASLOSSABADOS.Incidente i
 JOIN NOCURSOMASLOSSABADOS.Carrera car ON i.incidente_carrera=car.carrera_codigo
 JOIN NOCURSOMASLOSSABADOS.Auto_Carrera ac ON ac.auto_carrera_carrera = car.carrera_codigo
 JOIN NOCURSOMASLOSSABADOS.Auto_Incidente ai ON ai.auto_incidente_codigo=i.incidente_codigo
-JOIN NOCURSOMASLOSSABADOS.BI_dim_incidente_tipo it on it.incidente_tipo_codigo=ai.auto_incidente_incidente_codigo 
+JOIN NOCURSOMASLOSSABADOS.BI_dim_incidente_tipo it on it.incidente_tipo_codigo=ai.auto_incidente_tipo 
 JOIN NOCURSOMASLOSSABADOS.BI_dim_sector s ON s.sector_codigo=i.incidente_sector
 JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito circ ON circ.circuito_codigo=car.carrera_circuito
 JOIN NOCURSOMASLOSSABADOS.Auto a ON a.auto_codigo = ac.auto_carrera_auto
@@ -595,32 +604,52 @@ JOIN NOCURSOMASLOSSABADOS.BI_dim_fecha f ON f.fecha_anio = year(car.carrera_fech
 	f.fecha_id,
 	e.escuderia_codigo,
 	s.sector_codigo,
-	circ.circuito_codigo,
-	it.incidente_tipo_codigo
+	circ.circuito_codigo
 GO
 
 CREATE VIEW [NOCURSOMASLOSSABADOS].circuito_mas_peligrosos
 AS
 	SELECT TOP 3
 		c.circuitio_nombre,
-		COUNT( it.incidente_tipo_codigo) as cantidadIncidentes
+		f.fecha_anio,
+		hi.hi_cantidad_incidente as cantidadIncidentes
 	FROM NOCURSOMASLOSSABADOS.BI_hecho_incidente hi
-	JOIN NOCURSOMASLOSSABADOS.BI_dim_incidente_tipo it ON it.incidente_tipo_codigo = hi.hi_incidente_tipo
 	JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hi.hi_circuito
+	JOIN NOCURSOMASLOSSABADOS.BI_dim_fecha f on f.fecha_id = hi.hi_fecha
 	group by
 		c.circuito_codigo,
-		c.circuitio_nombre
-	ORDER BY 2,1
+		c.circuitio_nombre,
+		hi.hi_cantidad_incidente,
+		f.fecha_anio
+	ORDER BY cantidadIncidentes desc
 GO
+
+--prueba caserita
+
+select
+	circuito_codigo,
+	count(distinct incidente_codigo)
+from NOCURSOMASLOSSABADOS.Incidente
+join NOCURSOMASLOSSABADOS.Auto_Incidente on auto_incidente_incidente_codigo=incidente_codigo
+join NOCURSOMASLOSSABADOS.Incidente_Tipo on auto_incidente_tipo=incidente_tipo_codigo
+join NOCURSOMASLOSSABADOS.Sector on sector_codigo=incidente_sector
+join NOCURSOMASLOSSABADOS.Carrera on carrera_codigo=incidente_carrera
+join NOCURSOMASLOSSABADOS.Circuito on carrera_circuito=circuito_codigo
+join NOCURSOMASLOSSABADOS.Auto_Carrera on carrera_codigo=auto_carrera_carrera
+join NOCURSOMASLOSSABADOS.Auto on auto_codigo=auto_carrera_auto
+join NOCURSOMASLOSSABADOS.Escuderia on escuderia_codigo=auto_escuderia
+group by circuito_codigo
+
+
+
 CREATE VIEW [NOCURSOMASLOSSABADOS].promedio_incidentes_escuderia_anio
 AS
 	SELECT
-		AVG(it.incidente_tipo_codigo) promedioPorAnio,
+		AVG(hi.hi_cantidad_incidente) promedioPorAnio,
 		e.escuderia_nombre,
 		st.sector_tipo,
 		f.fecha_anio
 	FROM NOCURSOMASLOSSABADOS.BI_hecho_incidente hi
-	JOIN NOCURSOMASLOSSABADOS.BI_dim_incidente_tipo it ON it.incidente_tipo_codigo = hi.hi_incidente_tipo
 	JOIN NOCURSOMASLOSSABADOS.BI_dim_escuderia e ON e.escuderia_codigo = hi.hi_escuderia
 	JOIN NOCURSOMASLOSSABADOS.BI_dim_sector st ON st.sector_codigo = hi.hi_sector
 	JOIN NOCURSOMASLOSSABADOS.BI_dim_fecha f on f.fecha_id = hi.hi_fecha
@@ -629,5 +658,22 @@ AS
 		e.escuderia_nombre,
 		st.sector_tipo,
 		f.fecha_anio
-	order by 1,3,2,4
 GO
+
+-- prueba caserita
+
+select
+	escuderia_codigo,
+	sector_tipo_descripcion,
+	year(carrera_fecha)
+from NOCURSOMASLOSSABADOS.Incidente
+join NOCURSOMASLOSSABADOS.Auto_Incidente on auto_incidente_incidente_codigo=incidente_codigo
+join NOCURSOMASLOSSABADOS.Incidente_Tipo on auto_incidente_tipo=incidente_tipo_codigo
+join NOCURSOMASLOSSABADOS.Sector on sector_codigo=incidente_sector
+join NOCURSOMASLOSSABADOS.Sector_Tipo on sector_tipo=sector_tipo_codigo
+join NOCURSOMASLOSSABADOS.Carrera on carrera_codigo=incidente_carrera
+join NOCURSOMASLOSSABADOS.Circuito on carrera_circuito=circuito_codigo
+join NOCURSOMASLOSSABADOS.Auto_Carrera on carrera_codigo=auto_carrera_carrera
+join NOCURSOMASLOSSABADOS.Auto on auto_codigo=auto_carrera_auto
+join NOCURSOMASLOSSABADOS.Escuderia on escuderia_codigo=auto_escuderia
+group by escuderia_codigo,sector_tipo_descripcion,year(carrera_fecha)
