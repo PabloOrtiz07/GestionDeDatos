@@ -99,7 +99,7 @@ CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_neumatico_tipo
 CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_auto
 (
 	auto_codigo INTEGER PRIMARY KEY,
-	auto_modelo integer,
+	auto_modelo nvarchar(255),
 	auto_numero integer
 )
 
@@ -185,10 +185,11 @@ INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_auto
 	auto_numero
 )
 SELECT 
-	auto_codigo,
-	auto_modelo,
-	auto_numero
-FROM [NOCURSOMASLOSSABADOS].Auto
+	a.auto_codigo,
+	am.auto_modelo_descripcion,
+	a.auto_numero
+FROM [NOCURSOMASLOSSABADOS].Auto a
+JOIN NOCURSOMASLOSSABADOS.Auto_Modelo am ON am.auto_modelo_codigo = a.auto_modelo
 
 
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_dim_piloto
@@ -273,8 +274,8 @@ SELECT
 	p.piloto_codigo,
 	max(mm.motor_medicion_potencia) - min(mm.motor_medicion_potencia),
 	max(cm.caja_medicion_desgaste) - min(cm.caja_medicion_desgaste),
-	max(fm.freno_medicion_grosor) - min(fm.freno_medicion_grosor), --mmmm hay que ver si falta algun /4  --sum(fm.freno_medicion_grosor)/4 --subselect?
-	max(nm.neumatico_medicion_profundidad) - min(nm.neumatico_medicion_profundidad), --mmmm hay que ver si falta algun /4
+	max(fm.freno_medicion_grosor) - min(fm.freno_medicion_grosor) freno_desgaste, --mmmm hay que ver si falta algun /4  --sum(fm.freno_medicion_grosor)/4 --subselect?
+	max(nm.neumatico_medicion_profundidad) - min(nm.neumatico_medicion_profundidad) as neum_desgaste, --mmmm hay que ver si falta algun /4
 	max(m.medicion_tiempo_vuelta) - min(m.medicion_tiempo_vuelta), --el ultimo tiempo medido en cada sector - el primero. eso me da un minimo error de decimales, pq entre la ultima medicion de un sector y la primera del siguiente pasan unas decimas de segundo. Lo dejamos pasar no? sino creo que hay que hacer subselect para lo que va restado
 	max(m.medicion_combustible) - min(m.medicion_combustible),
 	max(m.medicion_velocidad)
@@ -291,7 +292,12 @@ join NOCURSOMASLOSSABADOS.BI_dim_piloto p on p.piloto_codigo = a.auto_piloto
 join NOCURSOMASLOSSABADOS.Motor_Medicion mm on mm.motor_medicion_medicion = m.medicion_codigo
 join NOCURSOMASLOSSABADOS.Caja_De_Cambio_Medicion cm on cm.caja_medicion_medicion = m.medicion_codigo
 join NOCURSOMASLOSSABADOS.Freno_medicion fm on fm.freno_medicion_medicion = m.medicion_codigo
+join NOCURSOMASLOSSABADOS.Freno fre on fre.freno_numero_serie = fm.freno_medicion_freno_numero_serie
+join NOCURSOMASLOSSABADOS.Posicion pos on pos.posicion_codigo = fre.freno_posicion
 join NOCURSOMASLOSSABADOS.Neumatico_Medicion nm on nm.neumatico_medicion_medicion = m.medicion_codigo
+join NOCURSOMASLOSSABADOS.Neumatico neu on neu.neumatico_numero_serie = nm.neumatico_medicion_neumatico_numero_serie
+--join NOCURSOMASLOSSABADOS.Posicion pos2 on pos2.posicion_codigo = neu.neumatico_posicion
+where neu.neumatico_posicion = pos.posicion_codigo
 group by
 	f.fecha_id,
 	e.escuderia_codigo,
@@ -299,9 +305,22 @@ group by
 	s.sector_codigo, --el mas chico
 	circ.circuito_codigo,
 	m.medicion_numero_vuelta,
-	p.piloto_codigo
+	p.piloto_codigo,
+	pos.posicion_codigo
+	--,
+	--pos2.posicion_codigo
+	order by 1,3,5,6,4
 GO
 
+--select * from NOCURSOMASLOSSABADOS.Freno_medicion
+
+--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 1 and auto_carrera_carrera = 3 --ac 51
+--select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 51 and medicion_numero_vuelta = 1 and medicion_sector = 15
+--select * from NOCURSOMASLOSSABADOS.Neumatico_Medicion where neumatico_medicion_medicion between 75790 and 75839 --prof ini 1. final: 0.991653  0.988901  0.988682  0.992217
+
+--select * from NOCURSOMASLOSSABADOS.Freno_medicion
+--select * from NOCURSOMASLOSSABADOS.Medicion
+--select * from NOCURSOMASLOSSABADOS.Posicion
 
 --select * from NOCURSOMASLOSSABADOS.Medicion 
 --join NOCURSOMASLOSSABADOS.Freno_medicion on freno_medicion_medicion = medicion_codigo
@@ -317,18 +336,24 @@ CREATE VIEW [NOCURSOMASLOSSABADOS].desgaste_promedio_componente_auto_vuelta_circ
 AS
 SELECT
 	c.circuitio_nombre,
+	a.auto_codigo,
 	a.auto_modelo, a.auto_numero,
 	hm.hm_numero_vuelta,
 	sum(hm.hm_motor_potencia_desgastada) as desgaste_motor,
 	sum(hm.hm_caja_desgaste) as desgaste_caja,
-	sum(hm.hm_freno_grosor_promedio) as desgaste_frenos,
-	sum(hm.hm_neumatico_profundidad_promedio) as desgaste_neumaticos
+	sum(hm.hm_freno_grosor_promedio) /4 as desgaste_frenos,
+	sum(hm.hm_neumatico_profundidad_promedio) /4 as desgaste_neumaticos
 FROM NOCURSOMASLOSSABADOS.BI_hecho_medicion hm
 JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuito
 JOIN NOCURSOMASLOSSABADOS.BI_dim_auto a ON a.auto_codigo = hm_auto
-group by c.circuitio_nombre, a.auto_modelo, a.auto_numero, hm.hm_numero_vuelta
+group by c.circuitio_nombre, a.auto_codigo ,a.auto_modelo, a.auto_numero, hm.hm_numero_vuelta
 order by 1, 2,3,4
 GO
+
+--select * from NOCURSOMASLOSSABADOS.Auto --auto 1 es nro 2  es modelo 7= R26      --vuelta 1: desgaste neum da 0.115452
+--select * from NOCURSOMASLOSSABADOS.Auto_Modelo
+--select * from NOCURSOMASLOSSABADOS.BI_dim_auto
+
 
 
 CREATE VIEW [NOCURSOMASLOSSABADOS].mejor_tiempo_vuelta_escuderia_anual_por_circuito
@@ -337,7 +362,7 @@ SELECT
 	f.fecha_anio,
 	c.circuitio_nombre,
 	e.escuderia_nombre,
-	(select top 1 sum(hm2.hm_tiempo_vuelta) --esto me trae el tiempo de vuelta total de cada vuelta
+	(select top 1 sum(hm2.hm_tiempo_vuelta)/4 --esto me trae el tiempo de vuelta total de cada vuelta
 		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
 		where hm2.hm_circuito = hm.hm_circuito 
 		and hm2.hm_escuderia = hm.hm_escuderia
@@ -354,10 +379,29 @@ group by f.fecha_anio, c.circuito_codigo, c.circuitio_nombre, e.escuderia_codigo
 order by 1,2,3
 GO
 
---select * from NOCURSOMASLOSSABADOS.Carrera where carrera_circuito = 1 
---select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 1 --este auto la vuelta 3 tiene una sola medicion (habrá chocado ponele)
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_codigo = 17 --auto 12 carrera 1
+--creo que da bien, salvo esas diferencias de los decimales de lo q preguntamos en el mail. Es rari igual tener que hacer /4 pq esta repetido 4 veces por los frenos y neumativos
+select (sum(hm2.hm_tiempo_vuelta)/4 ) --esto me trae el tiempo de vuelta total de cada vuelta
+		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
+		where hm2.hm_circuito = 3
+		and hm2.hm_escuderia = 3
+		and hm2.hm_fecha = 1
+		group by hm2.hm_circuito, hm2.hm_auto, hm2.hm_numero_vuelta
+		having sum(hm2.hm_tiempo_vuelta) > 0 --sino me traia 0 pq capaz un auto corrio 0 
+		order by 1 asc
 
+
+select * from NOCURSOMASLOSSABADOS.Carrera where carrera_circuito = 3 
+select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 1 --este auto la vuelta 3 tiene una sola medicion (habrá chocado ponele)
+select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_codigo = 17 --auto 12 carrera 1
+
+select * from NOCURSOMASLOSSABADOS.Escuderia -- Mild Seven Renault F1 Team es 3
+select * from NOCURSOMASLOSSABADOS.Auto where auto_escuderia = 3 --auto 1, 3
+select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 3 and auto_carrera_auto in(1, 3) -- 41, 51
+select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (41)
+select medicion_numero_vuelta , max(medicion_tiempo_vuelta) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (41) group by medicion_numero_vuelta order by 2
+select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (51)
+select medicion_numero_vuelta , max(medicion_tiempo_vuelta) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (51) group by medicion_numero_vuelta order by 2
+--23.64
 
 
 CREATE VIEW [NOCURSOMASLOSSABADOS].circuitos_mayor_consumo_combustible_promedio
