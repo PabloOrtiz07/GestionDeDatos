@@ -243,108 +243,21 @@ CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_hecho_medicion --granularidad mas chica 
 	hm_max_velocidad decimal(18,2)
 )
 
-CREATE FUNCTION [NOCURSOMASLOSSABADOS].desgasteFreno 
-(
-	@auto int,
-	@circuito int,
-	@nroVuelta decimal(18,0),
-	@sector int
-)
-RETURNS decimal(18,2)
-AS
-BEGIN
-	DECLARE @desgastePromedio decimal(18,10) = (
-		select (
-				max(fremed1.freno_medicion_grosor) - min(fremed1.freno_medicion_grosor)
-				+ max(fremed2.freno_medicion_grosor) - min(fremed2.freno_medicion_grosor)
-				+ max(fremed3.freno_medicion_grosor) - min(fremed3.freno_medicion_grosor)
-				+ max(fremed4.freno_medicion_grosor) - min(fremed4.freno_medicion_grosor)
-				)/4
-		from
-				(
-				select medicion_codigo
-				from NOCURSOMASLOSSABADOS.Medicion
-				join NOCURSOMASLOSSABADOS.Auto_Carrera on auto_carrera_codigo = medicion.medicion_auto_carrera
-				where auto_carrera_auto = @auto and auto_carrera_carrera = @circuito
-				and medicion_numero_vuelta = @nroVuelta
-				and medicion_sector = @sector
-				) as mediciones
-		join NOCURSOMASLOSSABADOS.Freno_medicion fremed1 on mediciones.medicion_codigo = fremed1.freno_medicion_medicion
-		join NOCURSOMASLOSSABADOS.Freno freno1 on freno1.freno_numero_serie = fremed1.freno_medicion_freno_numero_serie
-		join NOCURSOMASLOSSABADOS.Freno_medicion fremed2 on mediciones.medicion_codigo = fremed2.freno_medicion_medicion
-		join NOCURSOMASLOSSABADOS.Freno freno2 on freno2.freno_numero_serie = fremed2.freno_medicion_freno_numero_serie
-		join NOCURSOMASLOSSABADOS.Freno_medicion fremed3 on mediciones.medicion_codigo = fremed3.freno_medicion_medicion
-		join NOCURSOMASLOSSABADOS.Freno freno3 on freno3.freno_numero_serie = fremed3.freno_medicion_freno_numero_serie
-		join NOCURSOMASLOSSABADOS.Freno_medicion fremed4 on mediciones.medicion_codigo = fremed4.freno_medicion_medicion
-		join NOCURSOMASLOSSABADOS.Freno freno4 on freno4.freno_numero_serie = fremed4.freno_medicion_freno_numero_serie
-		where freno1.freno_posicion = 1
-		and freno2.freno_posicion = 2
-		and freno3.freno_posicion = 3
-		and freno4.freno_posicion = 4
-	);
-	RETURN @desgastePromedio;
-END
-GO
-
-
-select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 1 and auto_carrera_carrera = 3 --ac 51
-select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 51 and medicion_numero_vuelta = 1 and medicion_sector = 15
-select * from NOCURSOMASLOSSABADOS.Neumatico_Medicion where neumatico_medicion_medicion between 75790 and 75839 --prof ini 1. final: 0.991653  0.988901  0.988682  0.992217
---select * from NOCURSOMASLOSSABADOS.Freno_medicion where freno_medicion_medicion between 75790 and 75839 -- 
---0,038547           --0,00963675
-select [NOCURSOMASLOSSABADOS].desgasteFreno(1,3, 1,15) 
---freno desg 0.010000
-select [NOCURSOMASLOSSABADOS].desgasteNeumatico(1,3, 1,15) 	--la suma da 0.0452720000
-
-CREATE FUNCTION [NOCURSOMASLOSSABADOS].desgasteNeumatico 
-(
-	@auto int,
-	@circuito int,
-	@nroVuelta decimal(18,0),
-	@sector int
-)
-RETURNS decimal(18,10)
-AS
-BEGIN
-	DECLARE @desgastePromedio decimal(18,10) = (
-		select (
-				max(neumed1.neumatico_medicion_profundidad) - min(neumed1.neumatico_medicion_profundidad)
-				+ max(neumed2.neumatico_medicion_profundidad) - min(neumed2.neumatico_medicion_profundidad)
-				+ max(neumed3.neumatico_medicion_profundidad) - min(neumed3.neumatico_medicion_profundidad)
-				+ max(neumed4.neumatico_medicion_profundidad) - min(neumed4.neumatico_medicion_profundidad)
-				)/4
-		from
-				(
-				select medicion_codigo
-				from NOCURSOMASLOSSABADOS.Medicion
-				join NOCURSOMASLOSSABADOS.Auto_Carrera on auto_carrera_codigo = medicion.medicion_auto_carrera
-				where auto_carrera_auto = @auto and auto_carrera_carrera = @circuito
-				and medicion_numero_vuelta = @nroVuelta
-				and medicion_sector = @sector
-				) as mediciones
-		join NOCURSOMASLOSSABADOS.Neumatico_Medicion neumed1 on mediciones.medicion_codigo = neumed1.neumatico_medicion_medicion
-		join NOCURSOMASLOSSABADOS.Neumatico neu1 on neu1.neumatico_numero_serie = neumed1.neumatico_medicion_neumatico_numero_serie
-		join NOCURSOMASLOSSABADOS.Neumatico_Medicion neumed2 on mediciones.medicion_codigo = neumed2.neumatico_medicion_medicion
-		join NOCURSOMASLOSSABADOS.Neumatico neu2 on neu2.neumatico_numero_serie = neumed2.neumatico_medicion_neumatico_numero_serie
-		join NOCURSOMASLOSSABADOS.Neumatico_Medicion neumed3 on mediciones.medicion_codigo = neumed3.neumatico_medicion_medicion
-		join NOCURSOMASLOSSABADOS.Neumatico neu3 on neu3.neumatico_numero_serie = neumed3.neumatico_medicion_neumatico_numero_serie
-		join NOCURSOMASLOSSABADOS.Neumatico_Medicion neumed4 on mediciones.medicion_codigo = neumed4.neumatico_medicion_medicion
-		join NOCURSOMASLOSSABADOS.Neumatico neu4 on neu4.neumatico_numero_serie = neumed4.neumatico_medicion_neumatico_numero_serie
-		where neu1.neumatico_posicion = 1
-		and neu2.neumatico_posicion = 2
-		and neu3.neumatico_posicion = 3
-		and neu4.neumatico_posicion = 4
-	);
-	RETURN @desgastePromedio;
-END
-GO
-
 
 CREATE INDEX BI_IDX_medicion_1 ON NOCURSOMASLOSSABADOS.Freno_medicion(freno_medicion_medicion)
 GO
 
 CREATE INDEX BI_IDX_medicion_2 ON NOCURSOMASLOSSABADOS.Neumatico_Medicion(neumatico_medicion_medicion)
 GO
+
+
+--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 1 and auto_carrera_carrera = 3 --ac 51
+--select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 51 and medicion_numero_vuelta = 1 and medicion_sector = 15
+--select * from NOCURSOMASLOSSABADOS.Neumatico_Medicion where neumatico_medicion_medicion between 75790 and 75839 --prof ini 1. final: 0.991653  0.988901  0.988682  0.992217
+--select * from NOCURSOMASLOSSABADOS.Freno_medicion where freno_medicion_medicion between 75790 and 75839 -- 
+--auto 1, circuito 3, nroVuelta 1 , sector 15
+--neum desgaste  0,00963675
+--freno desg 0.010000
 
 
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_hecho_medicion
@@ -378,7 +291,6 @@ SELECT
 	max(mm.motor_medicion_potencia) - min(mm.motor_medicion_potencia),
 	max(cm.caja_medicion_desgaste) - min(cm.caja_medicion_desgaste),
 	
-	--NOCURSOMASLOSSABADOS.desgasteFreno(au.auto_codigo, circ.circuito_codigo, m.medicion_numero_vuelta, s.sector_codigo) as freno_desgaste_promedio,
 	(
 	max(fm1.freno_medicion_grosor) - min(fm1.freno_medicion_grosor)
 	+ max(fm2.freno_medicion_grosor) - min(fm2.freno_medicion_grosor)
@@ -393,8 +305,6 @@ SELECT
 	+ max(nm4.neumatico_medicion_profundidad) - min(nm4.neumatico_medicion_profundidad)
 	) /4 as neum_desg,
 
-	--NOCURSOMASLOSSABADOS.desgasteNeumatico(au.auto_codigo, circ.circuito_codigo, m.medicion_numero_vuelta, s.sector_codigo) as neumatico_desgaste_promedio,
-	
 	max(m.medicion_tiempo_vuelta) - min(m.medicion_tiempo_vuelta), --el ultimo tiempo medido en cada sector - el primero. eso me da un minimo error de decimales, pq entre la ultima medicion de un sector y la primera del siguiente pasan unas decimas de segundo. Lo dejamos pasar no? sino creo que hay que hacer subselect para lo que va restado
 	max(m.medicion_combustible) - min(m.medicion_combustible),
 	max(m.medicion_velocidad)
@@ -402,7 +312,7 @@ FROM NOCURSOMASLOSSABADOS.Medicion m
 join NOCURSOMASLOSSABADOS.Auto_Carrera ac on ac.auto_carrera_codigo = m.medicion_auto_carrera
 join NOCURSOMASLOSSABADOS.Carrera carr on carr.carrera_codigo = ac.auto_carrera_carrera
 join NOCURSOMASLOSSABADOS.BI_dim_fecha f on f.fecha_anio = year(carr.carrera_fecha) and f.fecha_cuatrimestre = DATEPART(QUARTER, carr.carrera_fecha)
-join NOCURSOMASLOSSABADOS.BI_dim_auto au on au.auto_codigo = ac.auto_carrera_auto --me cuesta saber si teia que joinear con auto o BI_dim_auto
+join NOCURSOMASLOSSABADOS.BI_dim_auto au on au.auto_codigo = ac.auto_carrera_auto
 join NOCURSOMASLOSSABADOS.Auto a on a.auto_codigo = ac.auto_carrera_auto
 join NOCURSOMASLOSSABADOS.BI_dim_escuderia e on e.escuderia_codigo = a.auto_escuderia
 join NOCURSOMASLOSSABADOS.BI_dim_sector s on s.sector_codigo = m.medicion_sector
@@ -461,37 +371,46 @@ GO
 --select * from NOCURSOMASLOSSABADOS.Sector where sector_tipo = 2
 
 
+--da bien salvo esos decimales de la pregunta del mail.
 CREATE VIEW [NOCURSOMASLOSSABADOS].desgaste_promedio_componente_auto_vuelta_circuito
 AS
 SELECT
 	c.circuitio_nombre,
-	a.auto_codigo,
 	a.auto_modelo, a.auto_numero,
 	hm.hm_numero_vuelta,
 	sum(hm.hm_motor_potencia_desgastada) as desgaste_motor,
 	sum(hm.hm_caja_desgaste) as desgaste_caja,
-	sum(hm.hm_freno_grosor_promedio) /4 as desgaste_frenos,
-	sum(hm.hm_neumatico_profundidad_promedio) /4 as desgaste_neumaticos
+	sum(hm.hm_freno_grosor_promedio) as desgaste_frenos,
+	sum(hm.hm_neumatico_profundidad_promedio) as desgaste_neumaticos
 FROM NOCURSOMASLOSSABADOS.BI_hecho_medicion hm
 JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuito
 JOIN NOCURSOMASLOSSABADOS.BI_dim_auto a ON a.auto_codigo = hm_auto
-group by c.circuitio_nombre, a.auto_codigo ,a.auto_modelo, a.auto_numero, hm.hm_numero_vuelta
-order by 1, 2,3,4
+group by c.circuitio_nombre ,a.auto_modelo, a.auto_numero, hm.hm_numero_vuelta
+--order by 1, 2,3,4
 GO
 
+--carrera 1  auto 1  modelo R26 num 2 vuelta 1
 --select * from NOCURSOMASLOSSABADOS.Auto --auto 1 es nro 2  es modelo 7= R26      --vuelta 1: desgaste neum da 0.115452
---select * from NOCURSOMASLOSSABADOS.Auto_Modelo
---select * from NOCURSOMASLOSSABADOS.BI_dim_auto
+--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 1 and auto_carrera_carrera = 1 --ac 1
+--select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 1 and medicion_numero_vuelta = 1 --751 and 900
+--select * from NOCURSOMASLOSSABADOS.Caja_De_Cambio_Medicion where caja_medicion_medicion between 751 and 900
+--select * from NOCURSOMASLOSSABADOS.Motor_Medicion where motor_medicion_medicion between 751 and 900
+--select * from NOCURSOMASLOSSABADOS.Freno_medicion where freno_medicion_medicion between 751 and 900
+--select * from NOCURSOMASLOSSABADOS.Neumatico_Medicion where neumatico_medicion_medicion between 751 and 900
+--select * from NOCURSOMASLOSSABADOS.Carrera where carrera_circuito = 1
+--select * from NOCURSOMASLOSSABADOS.Auto where auto_codigo = 14
+--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 1 and auto_carrera_auto = 14 --ac 19
+--select * from NOCURSOMASLOSSABADOS.Sector where sector_tipo = 2
 
 
-
+--da bien salvo esos decimales de la pregunta del mail.
 CREATE VIEW [NOCURSOMASLOSSABADOS].mejor_tiempo_vuelta_escuderia_anual_por_circuito
 AS
 SELECT 
 	f.fecha_anio,
 	c.circuitio_nombre,
 	e.escuderia_nombre,
-	(select top 1 sum(hm2.hm_tiempo_vuelta)/4 --esto me trae el tiempo de vuelta total de cada vuelta
+	(select top 1 sum(hm2.hm_tiempo_vuelta) --esto me trae el tiempo de vuelta total de cada vuelta
 		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
 		where hm2.hm_circuito = hm.hm_circuito 
 		and hm2.hm_escuderia = hm.hm_escuderia
@@ -505,50 +424,51 @@ JOIN NOCURSOMASLOSSABADOS.BI_dim_fecha f ON f.fecha_id = hm.hm_fecha
 JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuito
 JOIN NOCURSOMASLOSSABADOS.BI_dim_escuderia e ON e.escuderia_codigo = hm.hm_escuderia
 group by f.fecha_anio, c.circuito_codigo, c.circuitio_nombre, e.escuderia_codigo, e.escuderia_nombre, hm.hm_circuito, hm.hm_escuderia, hm.hm_fecha 
-order by 1,2,3
+--order by 1,2,3
 GO
 
---creo que da bien, salvo esas diferencias de los decimales de lo q preguntamos en el mail. Es rari igual tener que hacer /4 pq esta repetido 4 veces por los frenos y neumativos
-select (sum(hm2.hm_tiempo_vuelta)/4 ) --esto me trae el tiempo de vuelta total de cada vuelta
-		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
-		where hm2.hm_circuito = 3
-		and hm2.hm_escuderia = 3
-		and hm2.hm_fecha = 1
-		group by hm2.hm_circuito, hm2.hm_auto, hm2.hm_numero_vuelta
-		having sum(hm2.hm_tiempo_vuelta) > 0 --sino me traia 0 pq capaz un auto corrio 0 
-		order by 1 asc
+select * from NOCURSOMASLOSSABADOS.BI_hecho_medicion
 
 
-select * from NOCURSOMASLOSSABADOS.Carrera where carrera_circuito = 3 
-select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 1 --este auto la vuelta 3 tiene una sola medicion (habrá chocado ponele)
-select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_codigo = 17 --auto 12 carrera 1
+--select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 1 --este auto la vuelta 3 tiene una sola medicion (habrá chocado ponele)
+--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_codigo = 17 --auto 12 carrera 1
 
-select * from NOCURSOMASLOSSABADOS.Escuderia -- Mild Seven Renault F1 Team es 3
-select * from NOCURSOMASLOSSABADOS.Auto where auto_escuderia = 3 --auto 1, 3
-select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 3 and auto_carrera_auto in(1, 3) -- 41, 51
-select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (41)
-select medicion_numero_vuelta , max(medicion_tiempo_vuelta) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (41) group by medicion_numero_vuelta order by 2
-select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (51)
-select medicion_numero_vuelta , max(medicion_tiempo_vuelta) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (51) group by medicion_numero_vuelta order by 2
---23.64
+--select * from NOCURSOMASLOSSABADOS.Escuderia -- Mild Seven Renault F1 Team es 3
+--select * from NOCURSOMASLOSSABADOS.Auto where auto_escuderia = 3 --auto 1, 3
+--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 3 and auto_carrera_auto in(1, 3) -- 41, 51
+--select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (41)
+--select medicion_numero_vuelta , max(medicion_tiempo_vuelta) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (41) group by medicion_numero_vuelta order by 2
+--select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (51)
+--select medicion_numero_vuelta , max(medicion_tiempo_vuelta) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (51) group by medicion_numero_vuelta order by 2
+----23.64
+
+--select * from NOCURSOMASLOSSABADOS.Escuderia --  Panasonic Toyota Racing es 6
+--select * from NOCURSOMASLOSSABADOS.Auto where auto_escuderia = 6 --auto 4,15
+--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 2 and auto_carrera_auto in(4,15) -- 32,26
+--select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (32)
+--select medicion_numero_vuelta , max(medicion_tiempo_vuelta) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (32) group by medicion_numero_vuelta order by 2
+--select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (26)
+--select medicion_numero_vuelta , max(medicion_tiempo_vuelta) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (26) group by medicion_numero_vuelta order by 2
+----23.64
 
 
+--da bien CREO salvo esos decimales de la pregunta del mail.
 CREATE VIEW [NOCURSOMASLOSSABADOS].circuitos_mayor_consumo_combustible_promedio
 AS
 SELECT top 3 
 	c.circuitio_nombre,
-	--hm.hm_auto,
 	sum(hm.hm_consumo_combustible)
 FROM NOCURSOMASLOSSABADOS.BI_hecho_medicion hm
 JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuito
-group by c.circuito_codigo, c.circuitio_nombre, hm.hm_circuito--, hm.hm_auto
+group by c.circuito_codigo, c.circuitio_nombre, hm.hm_circuito
 GO
---lo comnetado estaba de prueba nomas. Parece q esta bien, salvo eso de la pregunta del foro
 
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 11 --ac 16
---select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 16 --600 - 194 = 406
+--carrera 2  auto 11
+--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 11 and auto_carrera_carrera = 2 --ac 36
+--select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 36 --600 - 143.04 = 456.96
 
 
+--anda perfecto
 CREATE VIEW [NOCURSOMASLOSSABADOS].max_velocidad_cada_auto_en_tipo_sector_en_circuito
 AS
 SELECT 
@@ -561,8 +481,17 @@ JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuit
 JOIN NOCURSOMASLOSSABADOS.BI_dim_auto a ON a.auto_codigo = hm.hm_auto
 JOIN NOCURSOMASLOSSABADOS.BI_dim_sector s ON s.sector_codigo = hm.hm_sector
 group by c.circuitio_nombre, a.auto_modelo, a.auto_numero, s.sector_tipo
-order by 1,2,3,4
+--order by 1,2,3,4
 GO
+
+--select * from NOCURSOMASLOSSABADOS.Auto_Modelo --248 F1 es 2
+--select * from NOCURSOMASLOSSABADOS.Auto where auto_modelo = 2 and auto_numero = 1 --auto 12
+--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 1 and auto_carrera_auto = 12 --ac 17
+--select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 17
+--select medicion_sector, max(medicion_velocidad) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 17 group by medicion_sector
+--select * from NOCURSOMASLOSSABADOS.Sector --1 4 7 recta 361.19     2 5 fren  361.19       3 6 curva   349.44
+--select * from NOCURSOMASLOSSABADOS.Sector_Tipo --1 fren   2 recta    3 curva
+
 
 
 /************************************/
