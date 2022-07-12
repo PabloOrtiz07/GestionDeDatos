@@ -243,42 +243,109 @@ CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_hecho_medicion --granularidad mas chica 
 	hm_max_velocidad decimal(18,2)
 )
 
-CREATE FUNCTION [NOCURSOMASLOSSABADOS].desgasteFreno (
-	@autoCarrera int,
+CREATE FUNCTION [NOCURSOMASLOSSABADOS].desgasteFreno 
+(
+	@auto int,
+	@circuito int,
 	@nroVuelta decimal(18,0),
 	@sector int
 )
 RETURNS decimal(18,2)
 AS
 BEGIN
-	DECLARE @desgastePromedio decimal(18,2) = (
-		--SELECT AVG(DesgastesPorVuelta.DesgasteEnVuelta)
-		--FROM (
-		--	/* El desgaste en una vuelta es el grosor inicial (que es el mayor) menos el final (que es el menor) */
-		--	SELECT
-		--		T.NumeroVuelta AS NumeroVuelta,
-		--		(MAX(TF.GrosorPastilla) - MIN(TF.GrosorPastilla)) AS DesgasteEnVuelta
-		--	FROM LA_SQLONETA.TelemetriasFreno AS TF
-		--	INNER JOIN LA_SQLONETA.Telemetrias AS T ON TF.IdTelemetriaBase = T.Id
-		--	WHERE T.IdAuto = @idAuto AND T.IdCarrera = @idCarrera AND TF.IdFreno = @idFreno
-		--	GROUP BY T.NumeroVuelta
-		--) AS DesgastesPorVuelta
-		select
+	DECLARE @desgastePromedio decimal(18,10) = (
+		select (
+				max(fremed1.freno_medicion_grosor) - min(fremed1.freno_medicion_grosor)
+				+ max(fremed2.freno_medicion_grosor) - min(fremed2.freno_medicion_grosor)
+				+ max(fremed3.freno_medicion_grosor) - min(fremed3.freno_medicion_grosor)
+				+ max(fremed4.freno_medicion_grosor) - min(fremed4.freno_medicion_grosor)
+				)/4
 		from
 				(
-				select *
+				select medicion_codigo
 				from NOCURSOMASLOSSABADOS.Medicion
-				where medicion_auto_carrera = @autoCarrera
+				join NOCURSOMASLOSSABADOS.Auto_Carrera on auto_carrera_codigo = medicion.medicion_auto_carrera
+				where auto_carrera_auto = @auto and auto_carrera_carrera = @circuito
 				and medicion_numero_vuelta = @nroVuelta
 				and medicion_sector = @sector
 				) as mediciones
-		--and freno_posicion = 1
+		join NOCURSOMASLOSSABADOS.Freno_medicion fremed1 on mediciones.medicion_codigo = fremed1.freno_medicion_medicion
+		join NOCURSOMASLOSSABADOS.Freno freno1 on freno1.freno_numero_serie = fremed1.freno_medicion_freno_numero_serie
+		join NOCURSOMASLOSSABADOS.Freno_medicion fremed2 on mediciones.medicion_codigo = fremed2.freno_medicion_medicion
+		join NOCURSOMASLOSSABADOS.Freno freno2 on freno2.freno_numero_serie = fremed2.freno_medicion_freno_numero_serie
+		join NOCURSOMASLOSSABADOS.Freno_medicion fremed3 on mediciones.medicion_codigo = fremed3.freno_medicion_medicion
+		join NOCURSOMASLOSSABADOS.Freno freno3 on freno3.freno_numero_serie = fremed3.freno_medicion_freno_numero_serie
+		join NOCURSOMASLOSSABADOS.Freno_medicion fremed4 on mediciones.medicion_codigo = fremed4.freno_medicion_medicion
+		join NOCURSOMASLOSSABADOS.Freno freno4 on freno4.freno_numero_serie = fremed4.freno_medicion_freno_numero_serie
+		where freno1.freno_posicion = 1
+		and freno2.freno_posicion = 2
+		and freno3.freno_posicion = 3
+		and freno4.freno_posicion = 4
 	);
 	RETURN @desgastePromedio;
 END
 GO
 
-select * from NOCURSOMASLOSSABADOS.Medicion
+
+select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 1 and auto_carrera_carrera = 3 --ac 51
+select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 51 and medicion_numero_vuelta = 1 and medicion_sector = 15
+select * from NOCURSOMASLOSSABADOS.Neumatico_Medicion where neumatico_medicion_medicion between 75790 and 75839 --prof ini 1. final: 0.991653  0.988901  0.988682  0.992217
+--select * from NOCURSOMASLOSSABADOS.Freno_medicion where freno_medicion_medicion between 75790 and 75839 -- 
+--0,038547           --0,00963675
+select [NOCURSOMASLOSSABADOS].desgasteFreno(1,3, 1,15) 
+--freno desg 0.010000
+select [NOCURSOMASLOSSABADOS].desgasteNeumatico(1,3, 1,15) 	--la suma da 0.0452720000
+
+CREATE FUNCTION [NOCURSOMASLOSSABADOS].desgasteNeumatico 
+(
+	@auto int,
+	@circuito int,
+	@nroVuelta decimal(18,0),
+	@sector int
+)
+RETURNS decimal(18,10)
+AS
+BEGIN
+	DECLARE @desgastePromedio decimal(18,10) = (
+		select (
+				max(neumed1.neumatico_medicion_profundidad) - min(neumed1.neumatico_medicion_profundidad)
+				+ max(neumed2.neumatico_medicion_profundidad) - min(neumed2.neumatico_medicion_profundidad)
+				+ max(neumed3.neumatico_medicion_profundidad) - min(neumed3.neumatico_medicion_profundidad)
+				+ max(neumed4.neumatico_medicion_profundidad) - min(neumed4.neumatico_medicion_profundidad)
+				)/4
+		from
+				(
+				select medicion_codigo
+				from NOCURSOMASLOSSABADOS.Medicion
+				join NOCURSOMASLOSSABADOS.Auto_Carrera on auto_carrera_codigo = medicion.medicion_auto_carrera
+				where auto_carrera_auto = @auto and auto_carrera_carrera = @circuito
+				and medicion_numero_vuelta = @nroVuelta
+				and medicion_sector = @sector
+				) as mediciones
+		join NOCURSOMASLOSSABADOS.Neumatico_Medicion neumed1 on mediciones.medicion_codigo = neumed1.neumatico_medicion_medicion
+		join NOCURSOMASLOSSABADOS.Neumatico neu1 on neu1.neumatico_numero_serie = neumed1.neumatico_medicion_neumatico_numero_serie
+		join NOCURSOMASLOSSABADOS.Neumatico_Medicion neumed2 on mediciones.medicion_codigo = neumed2.neumatico_medicion_medicion
+		join NOCURSOMASLOSSABADOS.Neumatico neu2 on neu2.neumatico_numero_serie = neumed2.neumatico_medicion_neumatico_numero_serie
+		join NOCURSOMASLOSSABADOS.Neumatico_Medicion neumed3 on mediciones.medicion_codigo = neumed3.neumatico_medicion_medicion
+		join NOCURSOMASLOSSABADOS.Neumatico neu3 on neu3.neumatico_numero_serie = neumed3.neumatico_medicion_neumatico_numero_serie
+		join NOCURSOMASLOSSABADOS.Neumatico_Medicion neumed4 on mediciones.medicion_codigo = neumed4.neumatico_medicion_medicion
+		join NOCURSOMASLOSSABADOS.Neumatico neu4 on neu4.neumatico_numero_serie = neumed4.neumatico_medicion_neumatico_numero_serie
+		where neu1.neumatico_posicion = 1
+		and neu2.neumatico_posicion = 2
+		and neu3.neumatico_posicion = 3
+		and neu4.neumatico_posicion = 4
+	);
+	RETURN @desgastePromedio;
+END
+GO
+
+
+CREATE INDEX BI_IDX_medicion_1 ON NOCURSOMASLOSSABADOS.Freno_medicion(freno_medicion_medicion)
+GO
+
+CREATE INDEX BI_IDX_medicion_2 ON NOCURSOMASLOSSABADOS.Neumatico_Medicion(neumatico_medicion_medicion)
+GO
+
 
 INSERT INTO [NOCURSOMASLOSSABADOS].BI_hecho_medicion
 (
@@ -310,8 +377,8 @@ SELECT
 	p.piloto_codigo,
 	max(mm.motor_medicion_potencia) - min(mm.motor_medicion_potencia),
 	max(cm.caja_medicion_desgaste) - min(cm.caja_medicion_desgaste),
-	--max(fm.freno_medicion_grosor) - min(fm.freno_medicion_grosor) freno_desgaste, --mmmm hay que ver si falta algun /4  --sum(fm.freno_medicion_grosor)/4 --subselect?
-
+	
+	--NOCURSOMASLOSSABADOS.desgasteFreno(au.auto_codigo, circ.circuito_codigo, m.medicion_numero_vuelta, s.sector_codigo) as freno_desgaste_promedio,
 	(
 	max(fm1.freno_medicion_grosor) - min(fm1.freno_medicion_grosor)
 	+ max(fm2.freno_medicion_grosor) - min(fm2.freno_medicion_grosor)
@@ -321,12 +388,13 @@ SELECT
 
 	(
 	max(nm1.neumatico_medicion_profundidad) - min(nm1.neumatico_medicion_profundidad)
-	--+ max(nm2.neumatico_medicion_profundidad) - min(nm2.neumatico_medicion_profundidad)
-	--+ max(nm3.neumatico_medicion_profundidad) - min(nm3.neumatico_medicion_profundidad)
-	--+ max(nm4.neumatico_medicion_profundidad) - min(nm4.neumatico_medicion_profundidad)
+	+ max(nm2.neumatico_medicion_profundidad) - min(nm2.neumatico_medicion_profundidad)
+	+ max(nm3.neumatico_medicion_profundidad) - min(nm3.neumatico_medicion_profundidad)
+	+ max(nm4.neumatico_medicion_profundidad) - min(nm4.neumatico_medicion_profundidad)
 	) /4 as neum_desg,
 
-	--max(nm.neumatico_medicion_profundidad) - min(nm.neumatico_medicion_profundidad) as neum_desgaste, --mmmm hay que ver si falta algun /4
+	--NOCURSOMASLOSSABADOS.desgasteNeumatico(au.auto_codigo, circ.circuito_codigo, m.medicion_numero_vuelta, s.sector_codigo) as neumatico_desgaste_promedio,
+	
 	max(m.medicion_tiempo_vuelta) - min(m.medicion_tiempo_vuelta), --el ultimo tiempo medido en cada sector - el primero. eso me da un minimo error de decimales, pq entre la ultima medicion de un sector y la primera del siguiente pasan unas decimas de segundo. Lo dejamos pasar no? sino creo que hay que hacer subselect para lo que va restado
 	max(m.medicion_combustible) - min(m.medicion_combustible),
 	max(m.medicion_velocidad)
@@ -344,48 +412,23 @@ join NOCURSOMASLOSSABADOS.Motor_Medicion mm on mm.motor_medicion_medicion = m.me
 join NOCURSOMASLOSSABADOS.Caja_De_Cambio_Medicion cm on cm.caja_medicion_medicion = m.medicion_codigo
 
 join NOCURSOMASLOSSABADOS.Freno_medicion fm1 on fm1.freno_medicion_medicion = m.medicion_codigo
-join NOCURSOMASLOSSABADOS.Freno fre1 on fre1.freno_numero_serie = fm1.freno_medicion_freno_numero_serie
-----join NOCURSOMASLOSSABADOS.Posicion pos1 on pos1.posicion_codigo = fre1.freno_posicion
+join NOCURSOMASLOSSABADOS.Freno fre1 on fre1.freno_numero_serie = fm1.freno_medicion_freno_numero_serie and fre1.freno_posicion = 1
 join NOCURSOMASLOSSABADOS.Freno_medicion fm2 on fm2.freno_medicion_medicion = m.medicion_codigo
-join NOCURSOMASLOSSABADOS.Freno fre2 on fre2.freno_numero_serie = fm2.freno_medicion_freno_numero_serie
-----join NOCURSOMASLOSSABADOS.Posicion pos2 on pos2.posicion_codigo = fre2.freno_posicion
+join NOCURSOMASLOSSABADOS.Freno fre2 on fre2.freno_numero_serie = fm2.freno_medicion_freno_numero_serie and fre2.freno_posicion = 2
 join NOCURSOMASLOSSABADOS.Freno_medicion fm3 on fm3.freno_medicion_medicion = m.medicion_codigo
-join NOCURSOMASLOSSABADOS.Freno fre3 on fre3.freno_numero_serie = fm3.freno_medicion_freno_numero_serie
-----join NOCURSOMASLOSSABADOS.Posicion pos3 on pos3.posicion_codigo = fre3.freno_posicion
+join NOCURSOMASLOSSABADOS.Freno fre3 on fre3.freno_numero_serie = fm3.freno_medicion_freno_numero_serie and fre3.freno_posicion = 3
 join NOCURSOMASLOSSABADOS.Freno_medicion fm4 on fm4.freno_medicion_medicion = m.medicion_codigo
-join NOCURSOMASLOSSABADOS.Freno fre4 on fre4.freno_numero_serie = fm4.freno_medicion_freno_numero_serie
-----join NOCURSOMASLOSSABADOS.Posicion pos4 on pos4.posicion_codigo = fre4.freno_posicion
-
---join NOCURSOMASLOSSABADOS.Posicion pos on pos.posicion_codigo = fre1.freno_posicion
+join NOCURSOMASLOSSABADOS.Freno fre4 on fre4.freno_numero_serie = fm4.freno_medicion_freno_numero_serie and fre4.freno_posicion = 4
 
 join NOCURSOMASLOSSABADOS.Neumatico_Medicion nm1 on nm1.neumatico_medicion_medicion = m.medicion_codigo
-join NOCURSOMASLOSSABADOS.Neumatico neu1 on neu1.neumatico_numero_serie = nm1.neumatico_medicion_neumatico_numero_serie
---join NOCURSOMASLOSSABADOS.Neumatico_Medicion nm2 on nm2.neumatico_medicion_medicion = m.medicion_codigo
---join NOCURSOMASLOSSABADOS.Neumatico neu2 on neu2.neumatico_numero_serie = nm2.neumatico_medicion_neumatico_numero_serie
---join NOCURSOMASLOSSABADOS.Neumatico_Medicion nm3 on nm3.neumatico_medicion_medicion = m.medicion_codigo
---join NOCURSOMASLOSSABADOS.Neumatico neu3 on neu3.neumatico_numero_serie = nm3.neumatico_medicion_neumatico_numero_serie
---join NOCURSOMASLOSSABADOS.Neumatico_Medicion nm4 on nm4.neumatico_medicion_medicion = m.medicion_codigo
---join NOCURSOMASLOSSABADOS.Neumatico neu4 on neu4.neumatico_numero_serie = nm4.neumatico_medicion_neumatico_numero_serie
+join NOCURSOMASLOSSABADOS.Neumatico neu1 on neu1.neumatico_numero_serie = nm1.neumatico_medicion_neumatico_numero_serie and neu1.neumatico_posicion = 1
+join NOCURSOMASLOSSABADOS.Neumatico_Medicion nm2 on nm2.neumatico_medicion_medicion = m.medicion_codigo
+join NOCURSOMASLOSSABADOS.Neumatico neu2 on neu2.neumatico_numero_serie = nm2.neumatico_medicion_neumatico_numero_serie and neu2.neumatico_posicion = 2
+join NOCURSOMASLOSSABADOS.Neumatico_Medicion nm3 on nm3.neumatico_medicion_medicion = m.medicion_codigo
+join NOCURSOMASLOSSABADOS.Neumatico neu3 on neu3.neumatico_numero_serie = nm3.neumatico_medicion_neumatico_numero_serie and neu3.neumatico_posicion = 3
+join NOCURSOMASLOSSABADOS.Neumatico_Medicion nm4 on nm4.neumatico_medicion_medicion = m.medicion_codigo
+join NOCURSOMASLOSSABADOS.Neumatico neu4 on neu4.neumatico_numero_serie = nm4.neumatico_medicion_neumatico_numero_serie and neu4.neumatico_posicion = 4
 
---join NOCURSOMASLOSSABADOS.Posicion pos2 on pos2.posicion_codigo = neu.neumatico_posicion
---where neu.neumatico_posicion = pos.posicion_codigo
---where fre1.freno_posicion = 1 
---and neu1.neumatico_posicion = pos1.posicion_codigo
---and fre2.freno_posicion = 2 
---and neu2.neumatico_posicion = pos2.posicion_codigo
---and fre3.freno_posicion = 3 
---and neu3.neumatico_posicion = pos3.posicion_codigo
---and fre4.freno_posicion = 4 
---and neu4.neumatico_posicion = pos4.posicion_codigo
-
-where fre1.freno_posicion = 1 
-and fre2.freno_posicion = 2 
-and fre3.freno_posicion = 3 
-and fre4.freno_posicion = 4 
-and fre1.freno_posicion = neu1.neumatico_posicion
---and fre2.freno_posicion = neu2.neumatico_posicion
---and fre3.freno_posicion = neu3.neumatico_posicion
---and fre4.freno_posicion = neu4.neumatico_posicion
 group by
 	f.fecha_id,
 	e.escuderia_codigo,
@@ -394,9 +437,7 @@ group by
 	circ.circuito_codigo,
 	m.medicion_numero_vuelta,
 	p.piloto_codigo
-	--,pos.posicion_codigo
-	--,
-	--pos2.posicion_codigo
+
 	order by 1,3,5,6,4
 GO
 
