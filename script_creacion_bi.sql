@@ -393,7 +393,7 @@ BEGIN
 		--	group by m2.medicion_auto_carrera, m2.medicion_sector, m2.medicion_numero_vuelta
 		--) as combust,
 		--quiero restar el max de la siguiente. ej: 100 - 89. y 89 - 85  da 15
-		(select isnull(tabla.consumoCombustible,0)
+		(select isnull(tabla.consumoCombustible,0)--podria ponerle en el isnull la codicion pero ya es un quilombo no puede ser
 		from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla
 		where tabla.circuito = circuito_codigo
 		and tabla.auto = au.auto_codigo
