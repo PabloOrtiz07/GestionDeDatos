@@ -278,6 +278,7 @@ BEGIN
 END
 GO
 
+--VER SI HAY QUE BORRARLAS O NO
 CREATE INDEX medicion_auto_carrera ON NOCURSOMASLOSSABADOS.Medicion(medicion_auto_carrera)
 CREATE INDEX medicion_sector ON NOCURSOMASLOSSABADOS.Medicion(medicion_sector)
 CREATE INDEX medicion_numero_vuelta ON NOCURSOMASLOSSABADOS.Medicion(medicion_numero_vuelta)
@@ -303,32 +304,31 @@ select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 1 and 
 select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 51  --6.74  4.04  la ultima de la vuelta 1 = 1.34   la primera de la vuelta 2 da = 6.74
 
 
-CREATE FUNCTION NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector()
-	RETURNS @Tabla TABLE (
-		circuito INT, 
-		auto INT,
-		numeroVuelta decimal(18,0),
-		sector int,
-		consumoCombustible DECIMAL(18,2)
-	)
-	AS
-	BEGIN
-		INSERT INTO @Tabla
-		SELECT
-			ac.auto_carrera_carrera,
-			ac.auto_carrera_auto,
-			m.medicion_numero_vuelta,
-			m.medicion_sector,
-			max(m.medicion_combustible)
-		FROM NOCURSOMASLOSSABADOS.Medicion m
-		join NOCURSOMASLOSSABADOS.Auto_Carrera ac on m.medicion_auto_carrera = ac.auto_carrera_codigo
-		GROUP BY ac.auto_carrera_carrera,
-			ac.auto_carrera_auto,
-			m.medicion_numero_vuelta,
-			m.medicion_sector
-		ORDER BY 1,2,3,4
-	RETURN
-	END
+CREATE FUNCTION NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() returns @Tabla table (
+																												circuito integer, 
+																												auto integer,
+																												numeroVuelta decimal(18,0),
+																												sector integer,
+																												consumoCombustible decimal(18,2)
+																											)
+AS
+BEGIN
+	INSERT INTO @Tabla
+	SELECT
+		ac.auto_carrera_carrera,
+		ac.auto_carrera_auto,
+		m.medicion_numero_vuelta,
+		m.medicion_sector,
+		max(m.medicion_combustible)
+	FROM NOCURSOMASLOSSABADOS.Medicion m
+	join NOCURSOMASLOSSABADOS.Auto_Carrera ac on m.medicion_auto_carrera = ac.auto_carrera_codigo
+	GROUP BY ac.auto_carrera_carrera,
+		ac.auto_carrera_auto,
+		m.medicion_numero_vuelta,
+		m.medicion_sector
+	ORDER BY 1,2,3,4
+RETURN
+END
 GO
 
 
@@ -381,7 +381,7 @@ BEGIN
 
 		max(m.medicion_tiempo_vuelta) - min(m.medicion_tiempo_vuelta), --el ultimo tiempo medido en cada sector - el primero. eso me da un minimo error de decimales, pq entre la ultima medicion de un sector y la primera del siguiente pasan unas decimas de segundo. Lo dejamos pasar no? sino creo que hay que hacer subselect para lo que va restado
 		
-		--max(m.medicion_combustible) - 
+		max(m.medicion_combustible) - 
 
 		--min(m.medicion_combustible),
 		--min(m2.medicion_combustible),
@@ -427,14 +427,20 @@ BEGIN
 		--and tabla.numeroVuelta = m.medicion_numero_vuelta
 		--and tabla.sector = s.sector_codigo +1
 		) ,
-		isnull((select count(*)--max(tabla2.consumoCombustible)
+		isnull((select max(tabla2.consumoCombustible)
 				from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla2
 				where tabla2.circuito = circuito_codigo
 				and tabla2.auto = au.auto_codigo
 				and tabla2.numeroVuelta = m.medicion_numero_vuelta +1
 				--and tabla2.sector = s.sector_codigo - count(*) + 1   --6
-				group by tabla2.circuito, tabla2.auto, tabla2.numeroVuelta, tabla2.sector
-				having tabla2.sector = s.sector_codigo - count(*) + 1
+				and tabla2.sector = (select top 1 min(tabla3.sector)
+									from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla3
+									where tabla3.circuito = circuito_codigo
+									and tabla3.auto = au.auto_codigo
+									group by tabla3.circuito, tabla3.auto
+									)
+				--group by tabla2.circuito, tabla2.auto, tabla2.numeroVuelta, tabla2.sector
+				--having tabla2.sector = s.sector_codigo - count(*) + 1
 				),max(m.medicion_combustible))
 		) as combus, 
 		--select * from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() order by 1,2,3,4
@@ -453,10 +459,6 @@ BEGIN
 	join NOCURSOMASLOSSABADOS.Motor_Medicion mm on mm.motor_medicion_medicion = m.medicion_codigo
 	join NOCURSOMASLOSSABADOS.Caja_De_Cambio_Medicion cm on cm.caja_medicion_medicion = m.medicion_codigo
 
-	--join NOCURSOMASLOSSABADOS.Medicion m2 on m2.medicion_auto_carrera = ac.auto_carrera_codigo 
-	--										and m2.medicion_numero_vuelta = m.medicion_numero_vuelta
-	--										and m2.medicion_sector = s.sector_codigo
-
 	join NOCURSOMASLOSSABADOS.Freno_medicion fm1 on fm1.freno_medicion_medicion = m.medicion_codigo
 	join NOCURSOMASLOSSABADOS.Freno fre1 on fre1.freno_numero_serie = fm1.freno_medicion_freno_numero_serie and fre1.freno_posicion = 1
 	join NOCURSOMASLOSSABADOS.Freno_medicion fm2 on fm2.freno_medicion_medicion = m.medicion_codigo
@@ -474,7 +476,6 @@ BEGIN
 	join NOCURSOMASLOSSABADOS.Neumatico neu3 on neu3.neumatico_numero_serie = nm3.neumatico_medicion_neumatico_numero_serie and neu3.neumatico_posicion = 3
 	join NOCURSOMASLOSSABADOS.Neumatico_Medicion nm4 on nm4.neumatico_medicion_medicion = m.medicion_codigo
 	join NOCURSOMASLOSSABADOS.Neumatico neu4 on neu4.neumatico_numero_serie = nm4.neumatico_medicion_neumatico_numero_serie and neu4.neumatico_posicion = 4
-
 	group by
 		f.fecha_id,
 		e.escuderia_codigo,
@@ -592,25 +593,25 @@ GO
 
 
 --da bien CREO salvo esos decimales de la pregunta del mail.
----en realidad FALTA ALGO CON EL "PROMEDIO" QUE PIDE. PODRIAMOS HACER PROMEDIO SEGUN CANTIDAD DE VUELTAS DEL CIRCUITO 
+--hice el promedio segun la cantidad de autos que corrieron en el circuito. ACLARAR EN LA ESTRETEGIA.
 CREATE VIEW [NOCURSOMASLOSSABADOS].circuitos_mayor_consumo_combustible_promedio
 AS
 SELECT top 3 
 	c.circuitio_nombre,
-	hm.hm_auto,
-	sum(hm.hm_consumo_combustible) as consumo_combustible_promedio
+	sum(hm.hm_consumo_combustible) / count(distinct hm.hm_auto) as consumo_combustible_promedio
 FROM NOCURSOMASLOSSABADOS.BI_hecho_medicion hm
 JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuito
-group by hm.hm_auto,c.circuito_codigo, c.circuitio_nombre, hm.hm_circuito
-order by 3 desc
+group by c.circuito_codigo, c.circuitio_nombre, hm.hm_circuito
+order by 2 desc
 GO
 
 --carrera 2  auto 11
-select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 11 and auto_carrera_carrera = 2 --ac 36
-select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 36 --600 - 143.04 = 456.96
-
 select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 14 and auto_carrera_carrera = 6 --ac 119
-select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 119 
+select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 119
+
+select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 3 and auto_carrera_carrera = 3 --ac 41
+select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 41
+--556,6
 
 --anda perfecto
 CREATE VIEW [NOCURSOMASLOSSABADOS].max_velocidad_cada_auto_en_tipo_sector_en_circuito
