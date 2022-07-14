@@ -381,7 +381,8 @@ BEGIN
 
 		max(m.medicion_tiempo_vuelta) - min(m.medicion_tiempo_vuelta), --el ultimo tiempo medido en cada sector - el primero. eso me da un minimo error de decimales, pq entre la ultima medicion de un sector y la primera del siguiente pasan unas decimas de segundo. Lo dejamos pasar no? sino creo que hay que hacer subselect para lo que va restado
 		
-		max(m.medicion_combustible) - 
+		--max(m.medicion_combustible) - 
+
 		--min(m.medicion_combustible),
 		--min(m2.medicion_combustible),
 		--(select min(m2.medicion_combustible)
@@ -393,7 +394,14 @@ BEGIN
 		--	group by m2.medicion_auto_carrera, m2.medicion_sector, m2.medicion_numero_vuelta
 		--) as combust,
 		--quiero restar el max de la siguiente. ej: 100 - 89. y 89 - 85  da 15
-		(select isnull(tabla.consumoCombustible,0)--podria ponerle en el isnull la codicion pero ya es un quilombo no puede ser
+		isnull((select tabla.consumoCombustible
+				--(select isnull(tabla2.consumoCombustible,456)
+				--from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla2
+				--where tabla2.circuito = circuito_codigo
+				--and tabla2.auto = au.auto_codigo
+				--and tabla2.numeroVuelta = m.medicion_numero_vuelta +1
+				--and tabla2.sector = tabla.sector -6
+				--)
 		from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla
 		where tabla.circuito = circuito_codigo
 		and tabla.auto = au.auto_codigo
@@ -418,6 +426,16 @@ BEGIN
 		--and case when tabla.numeroVuelta = m.medicion_numero_vuelta then 1 else 0 end
 		--and tabla.numeroVuelta = m.medicion_numero_vuelta
 		--and tabla.sector = s.sector_codigo +1
+		) ,
+		isnull((select count(*)--max(tabla2.consumoCombustible)
+				from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla2
+				where tabla2.circuito = circuito_codigo
+				and tabla2.auto = au.auto_codigo
+				and tabla2.numeroVuelta = m.medicion_numero_vuelta +1
+				--and tabla2.sector = s.sector_codigo - count(*) + 1   --6
+				group by tabla2.circuito, tabla2.auto, tabla2.numeroVuelta, tabla2.sector
+				having tabla2.sector = s.sector_codigo - count(*) + 1
+				),max(m.medicion_combustible))
 		) as combus, 
 		--select * from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() order by 1,2,3,4
 		
@@ -579,16 +597,20 @@ CREATE VIEW [NOCURSOMASLOSSABADOS].circuitos_mayor_consumo_combustible_promedio
 AS
 SELECT top 3 
 	c.circuitio_nombre,
+	hm.hm_auto,
 	sum(hm.hm_consumo_combustible) as consumo_combustible_promedio
 FROM NOCURSOMASLOSSABADOS.BI_hecho_medicion hm
 JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuito
-group by c.circuito_codigo, c.circuitio_nombre, hm.hm_circuito
+group by hm.hm_auto,c.circuito_codigo, c.circuitio_nombre, hm.hm_circuito
+order by 3 desc
 GO
 
 --carrera 2  auto 11
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 11 and auto_carrera_carrera = 2 --ac 36
---select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 36 --600 - 143.04 = 456.96
+select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 11 and auto_carrera_carrera = 2 --ac 36
+select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 36 --600 - 143.04 = 456.96
 
+select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 14 and auto_carrera_carrera = 6 --ac 119
+select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 119 
 
 --anda perfecto
 CREATE VIEW [NOCURSOMASLOSSABADOS].max_velocidad_cada_auto_en_tipo_sector_en_circuito
