@@ -17,16 +17,28 @@ IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_hecho_inci
 GO
 
 /************************************/
-/*			DROP INDICES				*/
+/*			DROP FUNCIONES         	*/
+/************************************/
+IF EXISTS (SELECT name FROM sys.objects WHERE name = 'tabla_combustible_max_circuito_auto_vuelta_sector')
+		DROP FUNCTION NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector;
+
+
+/************************************/
+/*			DROP INDICES			*/
 /************************************/
 IF EXISTS(SELECT name FROM sys.indexes WHERE name = 'indice_freno_medicion')
 		DROP INDEX indice_freno_medicion ON NOCURSOMASLOSSABADOS.Freno_medicion
 IF EXISTS(SELECT name FROM sys.indexes WHERE name = 'indice_neumatico_medicion')
 		DROP INDEX indice_neumatico_medicion ON NOCURSOMASLOSSABADOS.Neumatico_Medicion
+IF EXISTS(SELECT name FROM sys.indexes WHERE name = 'medicion_auto_carrera')
+		DROP INDEX medicion_auto_carrera ON NOCURSOMASLOSSABADOS.Medicion
+IF EXISTS(SELECT name FROM sys.indexes WHERE name = 'medicion_numero_vuelta')
+		DROP INDEX medicion_numero_vuelta ON NOCURSOMASLOSSABADOS.Medicion
 GO
 
+
 /************************************/
-/*			DROP TABLAS BI				*/
+/*			DROP TABLAS BI			*/
 /************************************/
 
 ------------ DROP TABLA HECHO ------------------------
@@ -80,7 +92,7 @@ IF EXISTS (SELECT name FROM sys.views WHERE name = 'promedio_incidentes_escuderi
 GO
 
 /************************************/
-/*			CREACION DIMENSIONES  BI   */
+/*		CREACION DIMENSIONES  BI   */
 /************************************/
 
 	CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_dim_fecha
@@ -139,7 +151,7 @@ GO
 GO
 
 /************************************/
-/*			CARGA DIMENSIONES BI				*/
+/*			CARGA DIMENSIONES BI	*/
 /************************************/
 
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_dimensiones_BI AS
@@ -247,70 +259,45 @@ GO
 /*	CREACION Y CARGA DE BI_HECHO_MEDICION	*/
 /************************************/
 
-	CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_hecho_medicion --granularidad mas chica es sector
-	(
-		hm_id INTEGER IDENTITY(1,1) PRIMARY KEY,
-		hm_fecha INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_fecha,
-		hm_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_escuderia,
-		hm_auto INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_auto,
-		hm_sector INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_sector,
-		hm_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_circuito,
+CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_hecho_medicion
+(
+	hm_id INTEGER IDENTITY(1,1) PRIMARY KEY,
+	hm_fecha INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_fecha,
+	hm_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_escuderia,
+	hm_auto INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_auto,
+	hm_sector INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_sector,
+	hm_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_circuito,
 	
-		hm_numero_vuelta decimal(18,0),
+	hm_numero_vuelta decimal(18,0),
 
-		hm_piloto INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_piloto,
+	hm_piloto INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_piloto,
 	
-		hm_motor_potencia_desgastada decimal(18,6),
-		hm_caja_desgaste decimal(18,2),
-		hm_freno_grosor_promedio decimal(18,2),
-		hm_neumatico_profundidad_promedio decimal(18,6),
-		hm_tiempo_vuelta decimal(18,10),
-		hm_consumo_combustible decimal(18,2),
-		hm_max_velocidad decimal(18,2)
-	)
+	hm_motor_potencia_desgastada decimal(18,6),
+	hm_caja_desgaste decimal(18,2),
+	hm_freno_grosor_promedio decimal(18,2),
+	hm_neumatico_profundidad_promedio decimal(18,6),
+	hm_tiempo_vuelta decimal(18,10),
+	hm_consumo_combustible decimal(18,2),
+	hm_max_velocidad decimal(18,2)
+)
 GO
 
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.crear_indice_para_carga_tabla_hecho_medicion_bi AS
 BEGIN
 	CREATE INDEX indice_neumatico_medicion ON NOCURSOMASLOSSABADOS.Neumatico_Medicion(neumatico_medicion_medicion)
-
 	CREATE INDEX indice_freno_medicion ON NOCURSOMASLOSSABADOS.Freno_medicion(freno_medicion_medicion)
+	CREATE INDEX medicion_auto_carrera ON NOCURSOMASLOSSABADOS.Medicion(medicion_auto_carrera)
+	CREATE INDEX medicion_numero_vuelta ON NOCURSOMASLOSSABADOS.Medicion(medicion_numero_vuelta)
 END
 GO
 
---VER SI HAY QUE BORRARLAS O NO
-CREATE INDEX medicion_auto_carrera ON NOCURSOMASLOSSABADOS.Medicion(medicion_auto_carrera)
-CREATE INDEX medicion_sector ON NOCURSOMASLOSSABADOS.Medicion(medicion_sector)
-CREATE INDEX medicion_numero_vuelta ON NOCURSOMASLOSSABADOS.Medicion(medicion_numero_vuelta)
-	
-	--select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 1 and auto_carrera_carrera = 3 --ac 51
---select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 51 and medicion_numero_vuelta = 1 and medicion_sector = 15
---select * from NOCURSOMASLOSSABADOS.Neumatico_Medicion where neumatico_medicion_medicion between 75790 and 75839 --prof ini 1. final: 0.991653  0.988901  0.988682  0.992217
---select * from NOCURSOMASLOSSABADOS.Freno_medicion where freno_medicion_medicion between 75790 and 75839 -- 
---auto 1, circuito 3, nroVuelta 1 , sector 15
---neum desgaste  0,00963675
---freno desg 0.010000
-
-select min(m2.medicion_combustible)
-		from NOCURSOMASLOSSABADOS.Medicion m2
-		join NOCURSOMASLOSSABADOS.Auto_Carrera ac2 on m2.medicion_auto_carrera = ac2.auto_carrera_codigo
-		where ac2.auto_carrera_auto = 1 and ac2.auto_carrera_carrera = 3
-		and m2.medicion_sector = 15
-		and m2.medicion_numero_vuelta = 1
-		group by m2.medicion_auto_carrera, m2.medicion_sector, m2.medicion_numero_vuelta
-
---carrera 3  auto 1
-select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 1 and auto_carrera_carrera = 3 --ac 51
-select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 51  --6.74  4.04  la ultima de la vuelta 1 = 1.34   la primera de la vuelta 2 da = 6.74
-
-
 CREATE FUNCTION NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() returns @Tabla table (
-																												circuito integer, 
-																												auto integer,
-																												numeroVuelta decimal(18,0),
-																												sector integer,
-																												consumoCombustible decimal(18,2)
-																											)
+		circuito integer, 
+		auto integer,
+		numeroVuelta decimal(18,0),
+		sector integer,
+		consumoCombustible decimal(18,2)
+	)
 AS
 BEGIN
 	INSERT INTO @Tabla
@@ -350,7 +337,7 @@ BEGIN
 		hm_caja_desgaste,
 		hm_freno_grosor_promedio,
 		hm_neumatico_profundidad_promedio,
-		hm_tiempo_vuelta, --tiempo de vuelta que consumio este sector. la suma de los tiempo_vuelta de los sectores nos da el tiempo de la vuelta total
+		hm_tiempo_vuelta,
 		hm_consumo_combustible,
 		hm_max_velocidad
 	)
@@ -379,71 +366,34 @@ BEGIN
 		+ max(nm4.neumatico_medicion_profundidad) - min(nm4.neumatico_medicion_profundidad)
 		) /4 as neum_desg,
 
-		max(m.medicion_tiempo_vuelta) - min(m.medicion_tiempo_vuelta), --el ultimo tiempo medido en cada sector - el primero. eso me da un minimo error de decimales, pq entre la ultima medicion de un sector y la primera del siguiente pasan unas decimas de segundo. Lo dejamos pasar no? sino creo que hay que hacer subselect para lo que va restado
+		max(m.medicion_tiempo_vuelta) - min(m.medicion_tiempo_vuelta),
 		
 		max(m.medicion_combustible) - 
-
-		--min(m.medicion_combustible),
-		--min(m2.medicion_combustible),
-		--(select min(m2.medicion_combustible)
-		--	from NOCURSOMASLOSSABADOS.Medicion m2
-		--	join NOCURSOMASLOSSABADOS.Auto_Carrera ac2 on m2.medicion_auto_carrera = ac2.auto_carrera_codigo
-		--	where ac2.auto_carrera_auto = au.auto_codigo and ac2.auto_carrera_carrera = circ.circuito_codigo
-		--	and m2.medicion_sector = s.sector_codigo
-		--	and m2.medicion_numero_vuelta = m.medicion_numero_vuelta
-		--	group by m2.medicion_auto_carrera, m2.medicion_sector, m2.medicion_numero_vuelta
-		--) as combust,
-		--quiero restar el max de la siguiente. ej: 100 - 89. y 89 - 85  da 15
-		isnull((select tabla.consumoCombustible
-				--(select isnull(tabla2.consumoCombustible,456)
-				--from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla2
-				--where tabla2.circuito = circuito_codigo
-				--and tabla2.auto = au.auto_codigo
-				--and tabla2.numeroVuelta = m.medicion_numero_vuelta +1
-				--and tabla2.sector = tabla.sector -6
-				--)
-		from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla
-		where tabla.circuito = circuito_codigo
-		and tabla.auto = au.auto_codigo
-		and
-		tabla.numeroVuelta = m.medicion_numero_vuelta
-		and tabla.sector = s.sector_codigo +1
-			--(
-			--	(tabla.numeroVuelta = m.medicion_numero_vuelta
-			--	and tabla.sector = s.sector_codigo +1		
-			--	)
-			--	or
-			--	(tabla.numeroVuelta = m.medicion_numero_vuelta +1
-			--	--and tabla.sector = s.sector_codigo -6 --para llegar al primer sector
-			--	and tabla.sector = (select top 1 min(sector)
-			--						from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla2
-			--						where tabla2.circuito = circuito_codigo
-			--						and tabla2.auto = au.auto_codigo
-			--						group by tabla2.circuito, tabla2.auto
-			--						)
-			--	)
-			--)
-		--and case when tabla.numeroVuelta = m.medicion_numero_vuelta then 1 else 0 end
-		--and tabla.numeroVuelta = m.medicion_numero_vuelta
-		--and tabla.sector = s.sector_codigo +1
-		) ,
-		isnull((select max(tabla2.consumoCombustible)
-				from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla2
-				where tabla2.circuito = circuito_codigo
-				and tabla2.auto = au.auto_codigo
-				and tabla2.numeroVuelta = m.medicion_numero_vuelta +1
-				--and tabla2.sector = s.sector_codigo - count(*) + 1   --6
-				and tabla2.sector = (select top 1 min(tabla3.sector)
-									from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla3
-									where tabla3.circuito = circuito_codigo
-									and tabla3.auto = au.auto_codigo
-									group by tabla3.circuito, tabla3.auto
-									)
-				--group by tabla2.circuito, tabla2.auto, tabla2.numeroVuelta, tabla2.sector
-				--having tabla2.sector = s.sector_codigo - count(*) + 1
-				),max(m.medicion_combustible))
+		isnull(
+			(select tabla.consumoCombustible
+				from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla
+				where tabla.circuito = circuito_codigo
+				and tabla.auto = au.auto_codigo
+				and
+				tabla.numeroVuelta = m.medicion_numero_vuelta
+				and tabla.sector = s.sector_codigo +1
+			),
+			isnull(
+				(select max(tabla2.consumoCombustible)
+					from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla2
+					where tabla2.circuito = circuito_codigo
+					and tabla2.auto = au.auto_codigo
+					and tabla2.numeroVuelta = m.medicion_numero_vuelta +1
+					and tabla2.sector = (select top 1 min(tabla3.sector)
+										from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() tabla3
+										where tabla3.circuito = circuito_codigo
+										and tabla3.auto = au.auto_codigo
+										group by tabla3.circuito, tabla3.auto
+										)
+				),
+			max(m.medicion_combustible)
+			)
 		) as combus, 
-		--select * from NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector() order by 1,2,3,4
 		
 		max(m.medicion_velocidad)
 	FROM NOCURSOMASLOSSABADOS.Medicion m
@@ -484,34 +434,10 @@ BEGIN
 		circ.circuito_codigo,
 		m.medicion_numero_vuelta,
 		p.piloto_codigo
-
-		order by 1,3,5,6,4
 END
 GO
 
-select * from NOCURSOMASLOSSABADOS.Medicion
 
---select * from NOCURSOMASLOSSABADOS.Freno_medicion
-
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 1 and auto_carrera_carrera = 3 --ac 51
---select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 51 and medicion_numero_vuelta = 1 and medicion_sector = 15
---select * from NOCURSOMASLOSSABADOS.Neumatico_Medicion where neumatico_medicion_medicion between 75790 and 75839 --prof ini 1. final: 0.991653  0.988901  0.988682  0.992217
-
---select * from NOCURSOMASLOSSABADOS.Freno_medicion
---select * from NOCURSOMASLOSSABADOS.Medicion
---select * from NOCURSOMASLOSSABADOS.Posicion
-
---select * from NOCURSOMASLOSSABADOS.Medicion 
---join NOCURSOMASLOSSABADOS.Freno_medicion on freno_medicion_medicion = medicion_codigo
---where medicion_auto_carrera = 19 and medicion_numero_vuelta = 17
-
---select * from NOCURSOMASLOSSABADOS.Carrera where carrera_circuito = 1
---select * from NOCURSOMASLOSSABADOS.Auto where auto_codigo = 14
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 1 and auto_carrera_auto = 14 --ac 19
---select * from NOCURSOMASLOSSABADOS.Sector where sector_tipo = 2
-
-
---da bien salvo esos decimales de la pregunta del mail.
 CREATE VIEW [NOCURSOMASLOSSABADOS].desgaste_promedio_componente_auto_vuelta_circuito
 AS
 SELECT
@@ -526,37 +452,22 @@ FROM NOCURSOMASLOSSABADOS.BI_hecho_medicion hm
 JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuito
 JOIN NOCURSOMASLOSSABADOS.BI_dim_auto a ON a.auto_codigo = hm_auto
 group by c.circuitio_nombre ,a.auto_modelo, a.auto_numero, hm.hm_numero_vuelta
---order by 1, 2,3,4
 GO
 
---carrera 1  auto 1  modelo R26 num 2 vuelta 1
---select * from NOCURSOMASLOSSABADOS.Auto --auto 1 es nro 2  es modelo 7= R26      --vuelta 1: desgaste neum da 0.115452
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 1 and auto_carrera_carrera = 1 --ac 1
---select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 1 and medicion_numero_vuelta = 1 --751 and 900
---select * from NOCURSOMASLOSSABADOS.Caja_De_Cambio_Medicion where caja_medicion_medicion between 751 and 900
---select * from NOCURSOMASLOSSABADOS.Motor_Medicion where motor_medicion_medicion between 751 and 900
---select * from NOCURSOMASLOSSABADOS.Freno_medicion where freno_medicion_medicion between 751 and 900
---select * from NOCURSOMASLOSSABADOS.Neumatico_Medicion where neumatico_medicion_medicion between 751 and 900
---select * from NOCURSOMASLOSSABADOS.Carrera where carrera_circuito = 1
---select * from NOCURSOMASLOSSABADOS.Auto where auto_codigo = 14
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 1 and auto_carrera_auto = 14 --ac 19
---select * from NOCURSOMASLOSSABADOS.Sector where sector_tipo = 2
 
-
---da bien salvo esos decimales de la pregunta del mail.
 CREATE VIEW [NOCURSOMASLOSSABADOS].mejor_tiempo_vuelta_escuderia_anual_por_circuito
 AS
 SELECT 
 	f.fecha_anio,
 	c.circuitio_nombre,
 	e.escuderia_nombre,
-	(select top 1 sum(hm2.hm_tiempo_vuelta) --esto me trae el tiempo de vuelta total de cada vuelta
+	(select top 1 sum(hm2.hm_tiempo_vuelta) 
 		from NOCURSOMASLOSSABADOS.BI_hecho_medicion hm2
 		where hm2.hm_circuito = hm.hm_circuito 
 		and hm2.hm_escuderia = hm.hm_escuderia
 		and hm2.hm_fecha = hm.hm_fecha
 		group by hm2.hm_circuito, hm2.hm_auto, hm2.hm_numero_vuelta
-		having sum(hm2.hm_tiempo_vuelta) > 0 --sino me traia 0 pq capaz un auto corrio 0 
+		having sum(hm2.hm_tiempo_vuelta) > 0 
 		order by 1 asc
 	) as mejor_tiempo_vuelta
 FROM NOCURSOMASLOSSABADOS.BI_hecho_medicion hm
@@ -564,36 +475,9 @@ JOIN NOCURSOMASLOSSABADOS.BI_dim_fecha f ON f.fecha_id = hm.hm_fecha
 JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuito
 JOIN NOCURSOMASLOSSABADOS.BI_dim_escuderia e ON e.escuderia_codigo = hm.hm_escuderia
 group by f.fecha_anio, c.circuito_codigo, c.circuitio_nombre, e.escuderia_codigo, e.escuderia_nombre, hm.hm_circuito, hm.hm_escuderia, hm.hm_fecha 
---order by 1,2,3
 GO
 
---select * from NOCURSOMASLOSSABADOS.BI_hecho_medicion
 
-
---select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 1 --este auto la vuelta 3 tiene una sola medicion (habrá chocado ponele)
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_codigo = 17 --auto 12 carrera 1
-
---select * from NOCURSOMASLOSSABADOS.Escuderia -- Mild Seven Renault F1 Team es 3
---select * from NOCURSOMASLOSSABADOS.Auto where auto_escuderia = 3 --auto 1, 3
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 3 and auto_carrera_auto in(1, 3) -- 41, 51
---select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (41)
---select medicion_numero_vuelta , max(medicion_tiempo_vuelta) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (41) group by medicion_numero_vuelta order by 2
---select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (51)
---select medicion_numero_vuelta , max(medicion_tiempo_vuelta) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (51) group by medicion_numero_vuelta order by 2
-----23.64
-
---select * from NOCURSOMASLOSSABADOS.Escuderia --  Panasonic Toyota Racing es 6
---select * from NOCURSOMASLOSSABADOS.Auto where auto_escuderia = 6 --auto 4,15
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 2 and auto_carrera_auto in(4,15) -- 32,26
---select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (32)
---select medicion_numero_vuelta , max(medicion_tiempo_vuelta) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (32) group by medicion_numero_vuelta order by 2
---select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (26)
---select medicion_numero_vuelta , max(medicion_tiempo_vuelta) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera in (26) group by medicion_numero_vuelta order by 2
-----23.64
-
-
---da bien CREO salvo esos decimales de la pregunta del mail.
---hice el promedio segun la cantidad de autos que corrieron en el circuito. ACLARAR EN LA ESTRETEGIA.
 CREATE VIEW [NOCURSOMASLOSSABADOS].circuitos_mayor_consumo_combustible_promedio
 AS
 SELECT top 3 
@@ -605,15 +489,7 @@ group by c.circuito_codigo, c.circuitio_nombre, hm.hm_circuito
 order by 2 desc
 GO
 
---carrera 2  auto 11
-select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 14 and auto_carrera_carrera = 6 --ac 119
-select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 119
 
-select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_auto = 3 and auto_carrera_carrera = 3 --ac 41
-select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 41
---556,6
-
---anda perfecto
 CREATE VIEW [NOCURSOMASLOSSABADOS].max_velocidad_cada_auto_en_tipo_sector_en_circuito
 AS
 SELECT 
@@ -626,16 +502,7 @@ JOIN NOCURSOMASLOSSABADOS.BI_dim_circuito c ON c.circuito_codigo = hm.hm_circuit
 JOIN NOCURSOMASLOSSABADOS.BI_dim_auto a ON a.auto_codigo = hm.hm_auto
 JOIN NOCURSOMASLOSSABADOS.BI_dim_sector s ON s.sector_codigo = hm.hm_sector
 group by c.circuitio_nombre, a.auto_modelo, a.auto_numero, s.sector_tipo
---order by 1,2,3,4
 GO
-
---select * from NOCURSOMASLOSSABADOS.Auto_Modelo --248 F1 es 2
---select * from NOCURSOMASLOSSABADOS.Auto where auto_modelo = 2 and auto_numero = 1 --auto 12
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 1 and auto_carrera_auto = 12 --ac 17
---select * from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 17
---select medicion_sector, max(medicion_velocidad) from NOCURSOMASLOSSABADOS.Medicion where medicion_auto_carrera = 17 group by medicion_sector
---select * from NOCURSOMASLOSSABADOS.Sector --1 4 7 recta 361.19     2 5 fren  361.19       3 6 curva   349.44
---select * from NOCURSOMASLOSSABADOS.Sector_Tipo --1 fren   2 recta    3 curva
 
 
 
@@ -643,18 +510,17 @@ GO
 /*	CREACION Y CARGA DE BI_HECHO_PARADA	*/
 /************************************/
 
-
-	CREATE TABLE [NOCURSOMASLOSSABADOS].BI_hecho_parada
-	(
-		hp_id INTEGER IDENTITY(1,1) PRIMARY KEY,
-		hp_fecha INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_fecha,
-		hp_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_escuderia,
-		hp_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_circuito,
-		hp_neumatico_tipo INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_neumatico_tipo,
-		hp_cantidad_paradas integer,
-		hp_tiempo_parada decimal(18,2),
-		hp_tiempo_parada_promedio decimal(18,2)
-	)
+CREATE TABLE [NOCURSOMASLOSSABADOS].BI_hecho_parada
+(
+	hp_id INTEGER IDENTITY(1,1) PRIMARY KEY,
+	hp_fecha INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_fecha,
+	hp_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_escuderia,
+	hp_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_circuito,
+	hp_neumatico_tipo INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_neumatico_tipo,
+	hp_cantidad_paradas integer,
+	hp_tiempo_parada decimal(18,2),
+	hp_tiempo_parada_promedio decimal(18,2)
+)
 GO
 
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_hecho_parada_bi AS
@@ -696,18 +562,6 @@ END
 GO
 
 
---una hermosura la carga de esta tabla
---select * from NOCURSOMASLOSSABADOS.Auto order by auto_escuderia --escu 4 es auto 2 y 20
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera = 3 and auto_carrera_auto in (2, 20) --ac 50 y 52
---select * from NOCURSOMASLOSSABADOS.Parada_Box where parada_auto_carrera in (50, 52) --parada codigo 30,31,32
-
---select * from NOCURSOMASLOSSABADOS.Cambio_Por_Neumatico where cambio_parada_box_codigo in (30,31,32) -- UAD370772,OXU994430,VNG862903,GKW573092
---select * from NOCURSOMASLOSSABADOS.Neumatico where neumatico_numero_serie in ('UAD370772','OXU994430','VNG862903','GKW573092')
-
---select * from NOCURSOMASLOSSABADOS.Carrera --la carrera 3 circuito 3 fue el 2020-02-19, la unica del cuatri 1 de 2020 --fecha id 1
---select * from NOCURSOMASLOSSABADOS.Escuderia --escu 4 es Scuderia Toro Rosso
-
---ANDA PIOLA
 CREATE VIEW [NOCURSOMASLOSSABADOS].tiempo_promedio_cuatrimestre 
 AS
 	SELECT
@@ -724,12 +578,7 @@ AS
 		f.fecha_cuatrimestre
 GO
 
---select * from NOCURSOMASLOSSABADOS.Carrera --carrera y circuito 4 y 6 fueron cuatri 4 2020
---select * from NOCURSOMASLOSSABADOS.Auto order by auto_escuderia --escu 4 es auto 2 y 20
---select * from NOCURSOMASLOSSABADOS.Auto_Carrera where auto_carrera_carrera in (4, 6) and auto_carrera_auto in (2, 20) --ac 70, 72, 102, 120
---select * from NOCURSOMASLOSSABADOS.Parada_Box where parada_auto_carrera in (70, 72, 102, 120)
 
---debe andar bien
 CREATE VIEW [NOCURSOMASLOSSABADOS].cantidad_parada_de_circuitos_por_escuderia_anio
 AS
 	SELECT
@@ -749,7 +598,7 @@ AS
 		f.fecha_anio
 GO
 
---anda bien
+
 CREATE VIEW [NOCURSOMASLOSSABADOS].tres_circuitos_con_mayor_tiempo_parada
 AS
 	SELECT TOP 3
@@ -765,42 +614,20 @@ GO
 
 
 
-/*pruebas caseritas*/
---select
---	sum(parada_tiempo)
---from NOCURSOMASLOSSABADOS.Circuito 
---join NOCURSOMASLOSSABADOS.Carrera on circuito_codigo=carrera_circuito
---join NOCURSOMASLOSSABADOS.Auto_Carrera on auto_carrera_carrera=carrera_codigo
---join NOCURSOMASLOSSABADOS.Parada_Box on auto_carrera_codigo=parada_auto_carrera
---where circuito_nombre='CIRCUITO Nro: 4'
-
---select
---	count(distinct parada_codigo)
---from NOCURSOMASLOSSABADOS.Circuito 
---join NOCURSOMASLOSSABADOS.Carrera on circuito_codigo=carrera_circuito
---join NOCURSOMASLOSSABADOS.Auto_Carrera on auto_carrera_carrera=carrera_codigo
---join NOCURSOMASLOSSABADOS.Auto on auto_codigo=auto_carrera_auto
---join NOCURSOMASLOSSABADOS.Escuderia on auto_escuderia=escuderia_codigo
---join NOCURSOMASLOSSABADOS.Parada_Box on auto_carrera_codigo=parada_auto_carrera
---where circuito_nombre='CIRCUITO Nro: 1' and escuderia_nombre='Red Bull Racing' and YEAR(carrera_fecha)='2020' -- me falla
-
-
-
 /************************************/
 /*	CREACION Y CARGA DE BI_HECHO_INCIDENTE	*/
 /************************************/
 
-	CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_hecho_incidente
-	(
-		hi_id INTEGER IDENTITY(1,1) PRIMARY KEY,
-		hi_fecha INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_fecha,
-		hi_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_escuderia,
-		hi_sector INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_sector,
-		hi_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_circuito,
-		hi_incidente_tipo INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_incidente_tipo,
-		--la entrega pide incidente_tipo. ver si es simplemente esa tabla o si la unimos a incidente
-		hi_cantidad_incidente INTEGER
-	)
+CREATE TABLE  [NOCURSOMASLOSSABADOS].BI_hecho_incidente
+(
+	hi_id INTEGER IDENTITY(1,1) PRIMARY KEY,
+	hi_fecha INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_fecha,
+	hi_escuderia INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_escuderia,
+	hi_sector INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_sector,
+	hi_circuito INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_circuito,
+	hi_incidente_tipo INTEGER FOREIGN KEY references [NOCURSOMASLOSSABADOS].BI_dim_incidente_tipo,
+	hi_cantidad_incidente INTEGER
+)
 GO
 
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_hecho_incidente_bi AS
@@ -838,23 +665,6 @@ BEGIN
 		it.incidente_tipo_codigo
 END
 GO
---creo qie esta bien cargada
-
---fecha 1   escu 1   sector 15    circ 3    inc tipo 3   
---select * from NOCURSOMASLOSSABADOS.Auto where auto_escuderia = 1 --auto 5 y 13
---select * from NOCURSOMASLOSSABADOS.Auto_Incidente where auto_incidente_auto in (5, 13) --inc 6,13,20,21,29,39,40,53  
---select * from NOCURSOMASLOSSABADOS.Incidente where incidente_codigo in (6, 13,20,21,29,39,40,53) --en la carrera 3 inc codigo 20,21, sector 15
---select * from NOCURSOMASLOSSABADOS.Auto_Incidente where auto_incidente_incidente_codigo in (20,21)
-
---select * from NOCURSOMASLOSSABADOS.Incidente_Tipo where incidente_tipo_codigo in (1,3,4)
---select * from NOCURSOMASLOSSABADOS.Sector where sector_codigo in (1,8,15,22,29,36) --tipo sector 2
-
-----fecha 4   escu 7   circ 4 y 6    inc tipo 3 y 1   cant 1 y 1
---select * from NOCURSOMASLOSSABADOS.Auto where auto_escuderia = 7 --auto 11 y 18
---select * from NOCURSOMASLOSSABADOS.Auto_Incidente where auto_incidente_auto in (11, 18) --inc 3,14,20,21,35,47,54  
---select * from NOCURSOMASLOSSABADOS.Incidente where incidente_codigo in (3,14,20,21,35,47,54) --en la carrera 4 y 6  inc codigo 35,54 , sector 22 y 36
---select * from NOCURSOMASLOSSABADOS.Auto_Incidente where auto_incidente_incidente_codigo in (35, 54)
-
 
 
 CREATE VIEW [NOCURSOMASLOSSABADOS].circuito_mas_peligrosos
@@ -869,36 +679,16 @@ AS
 	group by
 		c.circuito_codigo,
 		c.circuitio_nombre,
-		--hi.hi_cantidad_incidente,
 		f.fecha_anio
 	ORDER BY cantidadIncidentes desc
 GO
---anda bien
---select * from NOCURSOMASLOSSABADOS.BI_hecho_incidente order by hi_circuito
-
---prueba caserita
-
---select
---	circuito_codigo,
---	count(distinct incidente_codigo)
---from NOCURSOMASLOSSABADOS.Incidente
---join NOCURSOMASLOSSABADOS.Auto_Incidente on auto_incidente_incidente_codigo=incidente_codigo
---join NOCURSOMASLOSSABADOS.Incidente_Tipo on auto_incidente_tipo=incidente_tipo_codigo
---join NOCURSOMASLOSSABADOS.Sector on sector_codigo=incidente_sector
---join NOCURSOMASLOSSABADOS.Carrera on carrera_codigo=incidente_carrera
---join NOCURSOMASLOSSABADOS.Circuito on carrera_circuito=circuito_codigo
---join NOCURSOMASLOSSABADOS.Auto_Carrera on carrera_codigo=auto_carrera_carrera
---join NOCURSOMASLOSSABADOS.Auto on auto_codigo=auto_carrera_auto
---join NOCURSOMASLOSSABADOS.Escuderia on escuderia_codigo=auto_escuderia
---group by circuito_codigo
 
 
---Promedio de incidentes que presenta cada escudería por año en los distintos tipo de sectores.
---CAPAZ ACLARAR EN LA ESTRATEGIA QUE LOS TIPOS DE SECTOR QUE NO TUVIERON INCIDENTES NUNCA NO SON MOSTRADOS Y SE ASUME DIRECTAMNET QUE SI NO APARECEN EN ESTA VISTA RESULTANTE ES QUE EL RESULTADO ES 0
+
 CREATE VIEW [NOCURSOMASLOSSABADOS].promedio_incidentes_escuderia_anio
 AS
 	SELECT
-		cast(sum(hi.hi_cantidad_incidente) as decimal(10,2)) / count(distinct hi.hi_circuito) as promedioporAnio, --sería el promedio segun cantidad de carreras
+		cast(sum(hi.hi_cantidad_incidente) as decimal(10,2)) / count(distinct hi.hi_circuito) as promedioporAnio,
 		e.escuderia_nombre,
 		s.sector_tipo,
 		f.fecha_anio
@@ -911,38 +701,10 @@ AS
 		e.escuderia_nombre,
 		s.sector_tipo,
 		f.fecha_anio
-	--order by 4
 GO
---esta bien que sean todos Recta. en los otros tipos de sector no sucedieron incidentes
-
---select * from NOCURSOMASLOSSABADOS.BI_hecho_incidente where hi_escuderia = 1 --en 2020 tuvo 5 carreras. en 2 tuvo 2 incidentes, en las otras 3 tuvo 1 solo incidente.
---select * from NOCURSOMASLOSSABADOS.Incidente
---select * from NOCURSOMASLOSSABADOS.Sector
---select * from NOCURSOMASLOSSABADOS.Sector_Tipo --recta es sector 2
-
---select * from NOCURSOMASLOSSABADOS.Auto_Incidente
---select * from NOCURSOMASLOSSABADOS.Escuderia --escu 1 es BMW Sauber F1 Team
-
--- prueba caserita
-
---select
---	escuderia_codigo,
---	sector_tipo_descripcion,
---	year(carrera_fecha)
---from NOCURSOMASLOSSABADOS.Incidente
---join NOCURSOMASLOSSABADOS.Auto_Incidente on auto_incidente_incidente_codigo=incidente_codigo
---join NOCURSOMASLOSSABADOS.Incidente_Tipo on auto_incidente_tipo=incidente_tipo_codigo
---join NOCURSOMASLOSSABADOS.Sector on sector_codigo=incidente_sector
---join NOCURSOMASLOSSABADOS.Sector_Tipo on sector_tipo=sector_tipo_codigo
---join NOCURSOMASLOSSABADOS.Carrera on carrera_codigo=incidente_carrera
---join NOCURSOMASLOSSABADOS.Circuito on carrera_circuito=circuito_codigo
---join NOCURSOMASLOSSABADOS.Auto_Carrera on carrera_codigo=auto_carrera_carrera
---join NOCURSOMASLOSSABADOS.Auto on auto_codigo=auto_carrera_auto
---join NOCURSOMASLOSSABADOS.Escuderia on escuderia_codigo=auto_escuderia
---group by escuderia_codigo,sector_tipo_descripcion,year(carrera_fecha)
 
 
-
+-------------------- EJECUCION DE PROCEDURES ---------------------
 EXEC NOCURSOMASLOSSABADOS.cargar_dimensiones_BI
 EXEC NOCURSOMASLOSSABADOS.crear_indice_para_carga_tabla_hecho_medicion_bi;
 EXEC NOCURSOMASLOSSABADOS.cargar_tabla_hecho_medicion_bi;
