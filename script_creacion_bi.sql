@@ -21,7 +21,7 @@ GO
 /************************************/
 IF EXISTS (SELECT name FROM sys.objects WHERE name = 'tabla_combustible_max_circuito_auto_vuelta_sector')
 		DROP FUNCTION NOCURSOMASLOSSABADOS.tabla_combustible_max_circuito_auto_vuelta_sector;
-
+GO
 
 /************************************/
 /*			DROP INDICES			*/
