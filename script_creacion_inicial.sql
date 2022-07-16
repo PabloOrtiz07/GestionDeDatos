@@ -7,13 +7,141 @@ BEGIN
 END
 GO
 
+/************************************/
+/*			DROP STORE PROCEDURES	*/
+/************************************/
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'crear_tablas')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.crear_tablas;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_pais')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_pais;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_escuderia')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_escuderia;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_auto_modelo')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_auto_modelo;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_piloto')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_piloto;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_auto')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_auto;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_circuito')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_circuito;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_carrera')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_carrera;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_auto_carrera')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_auto_carrera;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_bandera')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_bandera;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_sector_tipo')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_sector_tipo;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_sector')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_sector;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_incidente_tipo')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_incidente_tipo;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_incidente')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_incidente;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_auto_incidente')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_auto_incidente;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_medicion')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_medicion;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_motor_modelo')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_motor_modelo;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_motor')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_motor;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_motor_medicion')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_motor_medicion;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_caja_de_cambio_modelo')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_caja_de_cambio_modelo;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_caja_de_cambio')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_caja_de_cambio;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_caja_de_cambio_medicion')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_caja_de_cambio_medicion;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_posicion')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_posicion;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_freno')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_freno;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_freno_medicion')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_freno_medicion;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_neumatico_tipo')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_neumatico_tipo;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_neumatico')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_neumatico;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_neumatico_medicion')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_neumatico_medicion;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_parada_box')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_parada_box;
+IF EXISTS (SELECT name FROM sys.procedures WHERE name = 'cargar_tabla_cambio_por_neumatico')
+		DROP PROCEDURE NOCURSOMASLOSSABADOS.cargar_tabla_cambio_por_neumatico;
+GO
+
+
+/************************************/
+/*			DROP TABLAS				*/
+/************************************/
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Cambio_Por_Neumatico')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Cambio_Por_Neumatico;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Parada_Box')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Parada_Box;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Neumatico_Medicion')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Neumatico_Medicion;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Neumatico')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Neumatico;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Neumatico_Tipo')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Neumatico_Tipo;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Freno_medicion')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Freno_medicion;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Freno')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Freno;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Posicion')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Posicion;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Caja_De_Cambio_Medicion')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Medicion;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Caja_de_cambio')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Caja_de_cambio;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Caja_De_Cambio_Modelo')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Modelo;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Motor_Medicion')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Motor_Medicion;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Motor')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Motor;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Motor_Modelo')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Motor_Modelo;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Medicion')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Medicion;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Auto_Incidente')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Auto_Incidente;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Incidente')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Incidente;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Incidente_Tipo')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Incidente_Tipo;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Sector')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Sector;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Sector_Tipo')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Sector_Tipo;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Bandera')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Bandera;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Auto_Carrera')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Auto_Carrera;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Carrera')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Carrera;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Circuito')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Circuito;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Auto')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Auto;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Piloto')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Piloto;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Auto_Modelo')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Auto_Modelo;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Escuderia')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Escuderia;
+IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Pais')
+		DROP TABLE [NOCURSOMASLOSSABADOS].Pais;
+GO
+
+
 
 ----------CREACION DE TABLAS-------------------
 CREATE PROCEDURE NOCURSOMASLOSSABADOS.crear_tablas AS
 BEGIN
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Pais')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Pais;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Pais(
 		pais_codigo int identity(1,1) NOT NULL,
 		pais_descripcion nvarchar(255),
@@ -21,8 +149,6 @@ BEGIN
 	)
 
 	
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Escuderia')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Escuderia;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Escuderia(
 		escuderia_codigo int identity(1,1) NOT NULL,
 		escuderia_nombre nvarchar(255),
@@ -32,8 +158,6 @@ BEGIN
 	)
 
 	
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Auto_Modelo')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Auto_Modelo;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Auto_Modelo (
 	  auto_modelo_codigo int identity(1,1) NOT NULL,
 	  auto_modelo_descripcion nvarchar(255),
@@ -41,8 +165,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Piloto')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Piloto;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Piloto(
 		piloto_codigo int identity(1,1) NOT NULL,
 		piloto_nombre nvarchar(50),
@@ -54,8 +176,6 @@ BEGIN
 	)
 	
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Auto')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Auto;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Auto (
 	  auto_codigo int identity(1,1) NOT NULL,
 	  auto_escuderia int,
@@ -69,8 +189,6 @@ BEGIN
 	)
 	
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Circuito')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Circuito;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Circuito(
 		circuito_codigo int NOT NULL,
 		circuito_nombre nvarchar(255),
@@ -80,8 +198,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Carrera')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Carrera;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Carrera(
 		carrera_codigo int NOT NULL,
 		carrera_circuito int,
@@ -94,8 +210,6 @@ BEGIN
 	)
 
 	
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Auto_Carrera')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Auto_Carrera;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Auto_Carrera(
 		auto_carrera_codigo int identity(1,1) NOT NULL,
 		auto_carrera_auto int,
@@ -106,8 +220,6 @@ BEGIN
 	)
 
 	 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Bandera')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Bandera;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Bandera(
 		bandera_codigo int identity(1,1) NOT NULL,
 		bandera_color nvarchar(255),
@@ -115,8 +227,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Sector_Tipo')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Sector_Tipo;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Sector_Tipo(
 		sector_tipo_codigo int identity(1,1) NOT NULL,
 		sector_tipo_descripcion nvarchar(255),
@@ -124,8 +234,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Sector')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Sector;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Sector(
 		sector_codigo int NOT NULL,
 		sector_circuito int,
@@ -137,8 +245,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Incidente_Tipo')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Incidente_Tipo;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Incidente_Tipo(
 		incidente_tipo_codigo int identity(1,1) NOT NULL,
 		incidente_tipo_descripcion nvarchar(255),
@@ -146,8 +252,6 @@ BEGIN
 	)
 
 	
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Incidente')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Incidente;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Incidente(
 		incidente_codigo int identity(1,1) NOT NULL,
 		incidente_sector int,
@@ -161,8 +265,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Auto_Incidente')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Auto_Incidente;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Auto_Incidente(
 		auto_incidente_codigo int identity(1,1) NOT NULL,
 		auto_incidente_auto int,
@@ -176,8 +278,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Medicion')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Medicion;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Medicion(
 	medicion_codigo decimal(18,0) NOT NULL,
 	medicion_auto_carrera int,
@@ -195,8 +295,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Motor_Modelo')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Motor_Modelo;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Motor_Modelo(
 		motor_modelo_codigo int identity(1,1) NOT NULL,
 		motor_modelo_descripcion nvarchar(255),
@@ -204,9 +302,6 @@ BEGIN
 	)
 
 
-
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Motor')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Motor;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Motor(
 		motor_numero_serie nvarchar(255) NOT NULL,
 		motor_modelo int,
@@ -215,8 +310,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Motor_Medicion')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Motor_Medicion;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Motor_Medicion(
 		motor_medicion_codigo int identity(1,1) NOT NULL,
 		motor_medicion_medicion decimal(18,0),
@@ -231,8 +324,6 @@ BEGIN
 	)
 	
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Caja_De_Cambio_Modelo')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Modelo;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Modelo(
 		caja_modelo_codigo int identity(1,1) NOT NULL,
 		caja_modelo_descripcion nvarchar(50),
@@ -240,8 +331,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Caja_de_cambio')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Caja_de_cambio;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Caja_de_cambio(
 		caja_numero_serie nvarchar(255) NOT NULL,
 		caja_modelo int,
@@ -250,8 +339,6 @@ BEGIN
 	)
 
 	
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Caja_De_Cambio_Medicion')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Medicion;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Caja_De_Cambio_Medicion(
 		caja_medicion_codigo int identity(1,1) NOT NULL,
 		caja_medicion_medicion decimal(18,0),
@@ -265,8 +352,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Posicion')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Posicion;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Posicion(
 		posicion_codigo int identity(1,1) NOT NULL,
 		posicion_posicion nvarchar(255),
@@ -274,8 +359,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Freno')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Freno;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Freno(
 		freno_numero_serie nvarchar(255) NOT NULL,
 		freno_posicion int,
@@ -285,8 +368,6 @@ BEGIN
 	)
 
 	
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Freno_medicion')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Freno_medicion;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Freno_medicion(
 		freno_medicion_codigo int identity(1,1) NOT NULL,
 		freno_medicion_medicion decimal(18,0),
@@ -299,8 +380,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Neumatico_Tipo')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Neumatico_Tipo;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Neumatico_Tipo(
 		neumatico_tipo_codigo int identity(1,1) NOT NULL,
 		neumatico_tipo_descripcion nvarchar(255),
@@ -308,8 +387,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Neumatico')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Neumatico;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Neumatico(
 		neumatico_numero_serie nvarchar(255) NOT NULL,
 		neumatico_tipo int,
@@ -320,8 +397,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Neumatico_Medicion')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Neumatico_Medicion;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Neumatico_Medicion(
 		neumatico_medicion_codigo int identity(1,1) NOT NULL,
 		neumatico_medicion_medicion decimal(18,0),
@@ -335,8 +410,6 @@ BEGIN
 	)
 
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Parada_Box')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Parada_Box;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Parada_Box(
 		parada_codigo int identity(1,1) NOT NULL,
 		parada_auto_carrera int,
@@ -347,8 +420,6 @@ BEGIN
 	)
 	
 
-	IF EXISTS (SELECT name FROM sys.tables WHERE name = 'Cambio_Por_Neumatico')
-		DROP TABLE [NOCURSOMASLOSSABADOS].Cambio_Por_Neumatico;
 	CREATE TABLE [NOCURSOMASLOSSABADOS].Cambio_Por_Neumatico(
 		cambio_por_neumatico_codigo int identity(1,1) NOT NULL,
 		cambio_parada_box_codigo int,
